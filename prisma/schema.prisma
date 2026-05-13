@@ -1,0 +1,263 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER MODEL - AUTHENTICATION
+// ============================================================================
+// Simple user model for authentication and admin access
+model User {
+    id       String   @id @default(cuid())
+    email    String   @unique // Unique email for login
+    password String? // Hashed password (null for OAuth users)
+    name     String? // Optional full name
+    image    String? // Profile image URL (from OAuth)
+    role     UserRole @default(ADMIN) // User role determination
+    active   Boolean  @default(true) // Account status
+
+    // NextAuth relations
+    accounts Account[]
+    sessions Session[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("users")
+}
+
+// User role enum
+enum UserRole {
+    ADMIN // Full admin access
+    USER // Limited access
+}
+
+// ============================================================================
+// NEXTAUTH.JS MODELS
+// ============================================================================
+// These models are required by NextAuth.js for session and credential management
+
+model Account {
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+    @@map("accounts")
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("sessions")
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+    @@map("verification_tokens")
+}
+
+// ============================================================================
+// PROFILE / ABOUT MODEL
+// ============================================================================
+// Singleton model - represents the portfolio owner's profile information
+// There should only ever be one record in this table
+model About {
+    id       Int     @id @default(1) // Force single record
+    name     String
+    title    String // Main title (e.g., "DevOps & Infrastructure Expert")
+    summary  String  @db.Text // Hero section summary
+    bio      String  @db.Text // Full biography for about page
+    location String?
+    email    String?
+
+    // Social links
+    github   String?
+    linkedin String?
+    twitter  String?
+
+    // Statistics
+    yearsExp         String // e.g., "10+"
+    deploymentsCount String // e.g., "500+"
+    uptimeSla        String // e.g., "99.9%"
+    clustersManaged  String // e.g., "50+"
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("about")
+}
+
+// ============================================================================
+// PROJECT MODEL
+// ============================================================================
+// Represents portfolio projects showcasing work experience
+model Project {
+    id          Int    @id @default(autoincrement())
+    title       String
+    description String @db.Text
+
+    // Tags stored as JSON array for simplicity
+    // Alternative: Use separate ProjectTag junction table if normalization needed
+    tags String[] // e.g., ["Kubernetes", "AWS", "Terraform"]
+
+    // Status of the project
+    status ProjectStatus @default(ACTIVE)
+
+    // External links
+    github String? // GitHub repository URL
+    demo   String? // Demo/live URL
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("projects")
+}
+
+// Project status enum
+enum ProjectStatus {
+    PRODUCTION
+    ACTIVE
+    ARCHIVED
+}
+
+// ============================================================================
+// SKILL MODEL
+// ============================================================================
+// Represents technical skills in different categories
+model Skill {
+    id       Int     @id @default(autoincrement())
+    name     String // Skill name (e.g., "Kubernetes", "Terraform")
+    category String // Skill category
+    level    Int // Proficiency: 0-100 percentage
+    detail   String? @db.Text // Additional context (e.g., certifications, experience)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([category])
+    @@map("skills")
+}
+
+// ============================================================================
+// CERTIFICATION MODEL
+// ============================================================================
+// Represents professional certifications and credentials
+model Certification {
+    id           Int     @id @default(autoincrement())
+    name         String // Full certification name (e.g., "Certified Kubernetes Administrator")
+    issuer       String // Issuing organization (e.g., "CNCF", "AWS")
+    year         String // Year earned
+    badge        String // Badge code/abbreviation (e.g., "CKA", "CKAD")
+    credentialId String? // Credential identifier for verification
+    url          String? // Verification URL
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([badge])
+    @@map("certifications")
+}
+
+// ============================================================================
+// CV FILE MODEL
+// ============================================================================
+// Represents uploaded CV/resume files stored in S3
+model CVFile {
+    id       String @id @default(cuid()) // CUID for unique ID
+    filename String // Original filename (e.g., "resume-2024.pdf")
+    url      String // S3 URL where file is stored
+    size     String // File size (e.g., "284 KB")
+
+    // Mark one as the active/current CV
+    active Boolean @default(false)
+
+    uploadedAt DateTime @default(now())
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    @@index([active]) // Index for quick lookup of active CV
+    @@map("cv_files")
+}
+
+// ============================================================================
+// BLOG POST MODEL
+// ============================================================================
+// Represents blog posts (synced from Payload CMS or stored directly)
+model BlogPost {
+    id      Int     @id @default(autoincrement())
+    title   String
+    slug    String  @unique // URL-friendly slug
+    content String  @db.Text // Rich text content
+    excerpt String? @db.Text // Short excerpt for listings
+
+    // Publishing
+    status      BlogPostStatus @default(DRAFT)
+    publishedAt DateTime? // Date when published
+
+    // Metadata
+    views    Int     @default(0)
+    featured Boolean @default(false)
+
+    // Optional image/cover
+    image String? // Featured image URL
+    tags  String[] // Blog tags
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([slug])
+    @@index([status])
+    @@index([publishedAt])
+    @@map("blog_posts")
+}
+
+// Blog post status enum
+enum BlogPostStatus {
+    DRAFT
+    PUBLISHED
+}
+
+// ============================================================================
+// OPTIONAL: ACTIVITY LOG MODEL
+// ============================================================================
+// Useful for tracking changes to admin data and audit trail
+model AdminLog {
+    id      Int    @id @default(autoincrement())
+    action  String // e.g., "CREATED_PROJECT", "UPDATED_SKILL"
+    model   String // Model type (e.g., "Project", "Skill")
+    modelId Int? // ID of the affected record (if applicable)
+    changes Json? // JSON object with before/after values
+
+    timestamp DateTime @default(now())
+
+    @@index([model])
+    @@index([timestamp])
+    @@map("admin_logs")
+}
