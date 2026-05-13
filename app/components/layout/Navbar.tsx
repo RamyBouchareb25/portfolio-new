@@ -19,10 +19,10 @@ export function Navbar() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-[12px] border-b border-[rgba(225,253,255,0.2)] shadow-[0_0_15px_rgba(0,242,255,0.1)]"
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b border-[rgba(225,253,255,0.2)] shadow-[0_0_15px_rgba(0,242,255,0.1)]"
       style={{ background: "rgba(19,19,19,0.85)" }}
     >
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-16 h-16 flex items-center justify-between gap-8">
+      <div className="max-w-360 mx-auto px-8 lg:px-16 h-16 flex items-center justify-between gap-8">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <DevOpsLogo className="w-8 h-8" />

@@ -58,7 +58,7 @@ export function AdminAbout() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Basic info */}
-        <div className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.12)] p-6 flex flex-col gap-4" style={{ background: "rgba(10,10,10,0.6)" }}>
+        <div className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.12)] p-6 flex flex-col gap-4" style={{ background: "rgba(10,10,10,0.6)" }}>
           <p className="text-[#b3c5ff] text-[12px] tracking-[1.4px] uppercase" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>[BASIC_INFO]</p>
           {[
             { k: "name", label: "Display Name" },
@@ -74,7 +74,7 @@ export function AdminAbout() {
         </div>
 
         {/* Social links */}
-        <div className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.12)] p-6 flex flex-col gap-4" style={{ background: "rgba(10,10,10,0.6)" }}>
+        <div className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.12)] p-6 flex flex-col gap-4" style={{ background: "rgba(10,10,10,0.6)" }}>
           <p className="text-[#b3c5ff] text-[12px] tracking-[1.4px] uppercase" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>[SOCIAL_LINKS]</p>
           {[
             { k: "github", label: "GitHub URL" },
@@ -89,7 +89,7 @@ export function AdminAbout() {
         </div>
 
         {/* Summary */}
-        <div className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.12)] p-6 flex flex-col gap-4 lg:col-span-2" style={{ background: "rgba(10,10,10,0.6)" }}>
+        <div className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.12)] p-6 flex flex-col gap-4 lg:col-span-2" style={{ background: "rgba(10,10,10,0.6)" }}>
           <p className="text-[#b3c5ff] text-[12px] tracking-[1.4px] uppercase" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>[BIO_TEXT]</p>
           <div>
             <label className={lc} style={ls}>Executive Summary (hero section)</label>
@@ -102,7 +102,7 @@ export function AdminAbout() {
         </div>
 
         {/* Stats */}
-        <div className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.12)] p-6 flex flex-col gap-4 lg:col-span-2" style={{ background: "rgba(10,10,10,0.6)" }}>
+        <div className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.12)] p-6 flex flex-col gap-4 lg:col-span-2" style={{ background: "rgba(10,10,10,0.6)" }}>
           <p className="text-[#b3c5ff] text-[12px] tracking-[1.4px] uppercase" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>[STATS_COUNTERS]</p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[

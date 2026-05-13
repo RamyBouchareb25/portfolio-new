@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useParams } from "next/navigation";
+// import { useParams } from "next/navigation";
 import { ArrowLeft, Clock, Calendar, Share2 } from "lucide-react";
 import { TerminalBadge } from "../shared/TerminalBadge";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
@@ -83,7 +83,7 @@ spec:
 ];
 
 export function ArticlePage() {
-  const { slug } = useParams();
+  // const { slug } = useParams();
 
   const postMeta = {
     title:
@@ -104,7 +104,7 @@ export function ArticlePage() {
       }}
     >
       {/* Article Header */}
-      <article className="max-w-[800px] mx-auto px-8 py-12">
+      <article className="max-w-200 mx-auto px-8 py-12">
         {/* Back link */}
         <Link
           href="/blog"
@@ -160,7 +160,7 @@ export function ArticlePage() {
         </div>
 
         {/* Hero image */}
-        <div className="h-64 md:h-80 rounded-[4px] overflow-hidden border border-[rgba(0,242,255,0.15)] my-8">
+        <div className="h-64 md:h-80 rounded-lg overflow-hidden border border-[rgba(0,242,255,0.15)] my-8">
           <ImageWithFallback
             src={imgArticleHero}
             alt={postMeta.title}
@@ -232,7 +232,7 @@ export function ArticlePage() {
               return (
                 <div
                   key={i}
-                  className="rounded-[4px] border border-[rgba(0,242,255,0.2)] overflow-hidden"
+                  className="rounded-lg border border-[rgba(0,242,255,0.2)] overflow-hidden"
                 >
                   <div
                     className="px-4 py-2 border-b border-[rgba(0,242,255,0.15)] flex items-center justify-between"
@@ -249,7 +249,7 @@ export function ArticlePage() {
                     </span>
                   </div>
                   <pre
-                    className="p-5 overflow-x-auto text-[#e1fdff] text-[13px] leading-[21px]"
+                    className="p-5 overflow-x-auto text-[#e1fdff] text-[13px] leading-5.25"
                     style={{
                       background: "rgba(0,5,5,0.9)",
                       fontFamily: "'JetBrains Mono', monospace",

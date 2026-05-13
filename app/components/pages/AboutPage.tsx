@@ -59,12 +59,12 @@ export function AboutPage() {
       }}
     >
       {/* Header */}
-      <section className="max-w-[1440px] mx-auto px-8 lg:px-16 py-16 border-b border-[rgba(225,253,255,0.1)]">
+      <section className="max-w-360 mx-auto px-8 lg:px-16 py-16 border-b border-[rgba(225,253,255,0.1)]">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
           <div className="lg:col-span-2 flex flex-col gap-5">
             <SectionHeader label="/ETC/PROFILE" title="About Me" />
             <p
-              className="text-[#b9cacb] text-[16px] leading-[26px]"
+              className="text-[#b9cacb] text-[16px] leading-6.5"
               style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
             >
               I architect, deploy, and maintain highly available infrastructure for mission-critical applications.
@@ -72,10 +72,10 @@ export function AboutPage() {
               ensure systems run flawlessly under pressure.
             </p>
             <p
-              className="text-[#b9cacb] text-[16px] leading-[26px]"
+              className="text-[#b9cacb] text-[16px] leading-6.5"
               style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
             >
-              With 10+ years in the trenches of cloud-native infrastructure, I've led migrations from bare metal to
+              With 10+ years in the trenches of cloud-native infrastructure, I&apos;ve led migrations from bare metal to
               multi-cloud Kubernetes, built platform teams from scratch, and helped companies scale from startup to
               enterprise without losing reliability.
             </p>
@@ -91,10 +91,10 @@ export function AboutPage() {
 
           {/* Profile card */}
           <div
-            className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] p-6"
+            className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] p-6"
             style={{ background: "rgba(10,10,10,0.6)" }}
           >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[rgba(0,242,255,0.2)] to-[rgba(179,197,255,0.1)] border border-[rgba(0,242,255,0.3)] flex items-center justify-center mb-5">
+            <div className="w-20 h-20 rounded-full bg-linear-to-br from-[rgba(0,242,255,0.2)] to-[rgba(179,197,255,0.1)] border border-[rgba(0,242,255,0.3)] flex items-center justify-center mb-5">
               <span
                 className="text-[#00F2FF] text-[24px]"
                 style={{ fontFamily: "'Geist', sans-serif", fontWeight: 800 }}
@@ -137,7 +137,7 @@ export function AboutPage() {
       </section>
 
       {/* Experience */}
-      <section className="max-w-[1440px] mx-auto px-8 lg:px-16 py-16">
+      <section className="max-w-360 mx-auto px-8 lg:px-16 py-16">
         <div className="mb-12">
           <SectionHeader label="/VAR/LOG/CAREER" title="Work Experience" />
         </div>
@@ -147,15 +147,15 @@ export function AboutPage() {
             <div key={i} className="relative pl-8 pb-12">
               {/* Timeline line */}
               {i < EXPERIENCE.length - 1 && (
-                <div className="absolute left-[11px] top-6 bottom-0 w-px bg-gradient-to-b from-[rgba(0,242,255,0.4)] to-[rgba(0,242,255,0.05)]" />
+                <div className="absolute left-2.75 top-6 bottom-0 w-px bg-linear-to-b from-[rgba(0,242,255,0.4)] to-[rgba(0,242,255,0.05)]" />
               )}
               {/* Dot */}
-              <div className="absolute left-0 top-1.5 w-[22px] h-[22px] rounded-full border-2 border-[rgba(0,242,255,0.5)] bg-[#131313] flex items-center justify-center">
+              <div className="absolute left-0 top-1.5 w-5.5 h-5.5 rounded-full border-2 border-[rgba(0,242,255,0.5)] bg-[#131313] flex items-center justify-center">
                 <div className="w-2 h-2 rounded-full bg-[#00F2FF]" />
               </div>
 
               <div
-                className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.12)] p-6 hover:border-[rgba(0,242,255,0.25)] transition-colors"
+                className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.12)] p-6 hover:border-[rgba(0,242,255,0.25)] transition-colors"
                 style={{ background: "rgba(10,10,10,0.5)" }}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
@@ -180,7 +180,7 @@ export function AboutPage() {
                     <li key={j} className="flex gap-2">
                       <span className="text-[#00F2FF] mt-1 shrink-0 text-[12px]">›</span>
                       <span
-                        className="text-[#b9cacb] text-[14px] leading-[22px]"
+                        className="text-[#b9cacb] text-[14px] leading-5.5"
                         style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
                       >
                         {bullet}

@@ -11,7 +11,7 @@ import {
   User,
   Cpu,
   Upload,
-  Settings,
+  // Settings,
   LogOut,
   Menu,
   X,

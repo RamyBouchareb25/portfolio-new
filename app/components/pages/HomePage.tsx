@@ -2,14 +2,14 @@ import Link from "next/link";
 import {
   Download,
   ArrowRight,
-  Server,
-  GitBranch,
-  Shield,
-  Zap,
+  // Server,
+  // GitBranch,
+  // Shield,
+  // Zap,
 } from "lucide-react";
 import { TerminalBadge } from "../shared/TerminalBadge";
 import { SectionHeader } from "../shared/SectionHeader";
-import { ImageWithFallback } from "../figma/ImageWithFallback";
+// import { ImageWithFallback } from "../figma/ImageWithFallback";
 
 const STATS = [
   { value: "10+", label: "YEARS EXP" },
@@ -89,7 +89,7 @@ export function HomePage() {
           }}
         />
 
-        <div className="relative z-10 flex flex-col items-center gap-8 px-8 text-center max-w-[1024px] mx-auto pt-32 pb-24">
+        <div className="relative z-10 flex flex-col items-center gap-8 px-8 text-center max-w-5xl mx-auto pt-32 pb-24">
           <TerminalBadge variant="active">SYSTEMS_ONLINE</TerminalBadge>
 
           <h1
@@ -102,7 +102,7 @@ export function HomePage() {
           </h1>
 
           <p
-            className="text-[#b9cacb] text-xl max-w-[600px]"
+            className="text-[#b9cacb] text-xl max-w-150"
             style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
           >
             DevOps, Kubernetes, &amp; Cloud Architecture Expert
@@ -169,14 +169,14 @@ export function HomePage() {
       </section>
 
       {/* About Teaser - Bento Grid */}
-      <section className="max-w-[1440px] mx-auto px-8 lg:px-16 py-24">
+      <section className="max-w-360 mx-auto px-8 lg:px-16 py-24">
         <div className="flex flex-col gap-12">
           <SectionHeader label="/ETC/PROFILE" title="Executive Summary" />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main about card */}
             <div
-              className="lg:col-span-2 backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] p-8 relative overflow-hidden"
+              className="lg:col-span-2 backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] p-8 relative overflow-hidden"
               style={{ background: "rgba(10,10,10,0.6)" }}
             >
               <p
@@ -189,7 +189,7 @@ export function HomePage() {
                 README.md
               </p>
               <p
-                className="text-[#b9cacb] text-[16px] leading-[26px] mb-6"
+                className="text-[#b9cacb] text-[16px] leading-6.5 mb-6"
                 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
               >
                 I architect, deploy, and maintain highly available
@@ -203,7 +203,7 @@ export function HomePage() {
                   <TerminalBadge key={tag}>{tag}</TerminalBadge>
                 ))}
               </div>
-              <div className="absolute bottom-[20%] left-[1px] right-[1px] h-px opacity-50 bg-gradient-to-r from-transparent via-[rgba(0,242,255,0.8)] to-transparent" />
+              <div className="absolute bottom-[20%] left-px right-px h-px opacity-50 bg-linear-to-r from-transparent via-[rgba(0,242,255,0.8)] to-transparent" />
             </div>
 
             {/* Stats */}
@@ -211,7 +211,7 @@ export function HomePage() {
               {STATS.slice(0, 2).map((stat) => (
                 <div
                   key={stat.label}
-                  className="flex-1 backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] p-6 flex flex-col items-center justify-center relative overflow-hidden"
+                  className="flex-1 backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] p-6 flex flex-col items-center justify-center relative overflow-hidden"
                   style={{ background: "rgba(10,10,10,0.6)" }}
                 >
                   <span
@@ -242,7 +242,7 @@ export function HomePage() {
             {STATS.slice(2).map((stat) => (
               <div
                 key={stat.label}
-                className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] p-6 flex flex-col items-center justify-center"
+                className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] p-6 flex flex-col items-center justify-center"
                 style={{ background: "rgba(10,10,10,0.6)" }}
               >
                 <span
@@ -271,7 +271,7 @@ export function HomePage() {
         className="border-t border-[rgba(225,253,255,0.1)] py-24"
         style={{ background: "rgba(10,10,10,0.4)" }}
       >
-        <div className="max-w-[1440px] mx-auto px-8 lg:px-16">
+        <div className="max-w-360 mx-auto px-8 lg:px-16">
           <div className="flex items-end justify-between mb-12">
             <SectionHeader label="/VAR/PROJECTS" title="Featured Work" />
             <Link
@@ -290,7 +290,7 @@ export function HomePage() {
             {FEATURED_PROJECTS.map((project) => (
               <div
                 key={project.id}
-                className="group backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] p-6 hover:border-[rgba(0,242,255,0.4)] transition-colors cursor-pointer"
+                className="group backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] p-6 hover:border-[rgba(0,242,255,0.4)] transition-colors cursor-pointer"
                 style={{ background: "rgba(10,10,10,0.6)" }}
               >
                 <div className="flex items-start justify-between mb-4">
@@ -319,7 +319,7 @@ export function HomePage() {
                   {project.title}
                 </h3>
                 <p
-                  className="text-[#b9cacb] text-[14px] leading-[22px] mb-4"
+                  className="text-[#b9cacb] text-[14px] leading-5.5 mb-4"
                   style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
                 >
                   {project.description}
@@ -337,7 +337,7 @@ export function HomePage() {
 
       {/* CTA Section */}
       <section className="py-24 px-8 lg:px-16 text-center">
-        <div className="max-w-[600px] mx-auto">
+        <div className="max-w-150 mx-auto">
           <p
             className="text-[#b3c5ff] text-[14px] tracking-[1.4px] uppercase mb-4"
             style={{
@@ -354,10 +354,10 @@ export function HomePage() {
             Ready to Deploy?
           </h2>
           <p
-            className="text-[#b9cacb] text-[16px] leading-[26px] mb-8"
+            className="text-[#b9cacb] text-[16px] leading-6.5 mb-8"
             style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
           >
-            Let's build something resilient together. I'm available for
+            Let&apos;s build something resilient together. I&apos;m available for
             consulting, full-time opportunities, and infrastructure audits.
           </p>
           <Link

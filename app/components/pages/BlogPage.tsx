@@ -74,15 +74,15 @@ const POSTS = [
   },
 ];
 
-const ALL_TAGS = [
-  "All",
-  "Kubernetes",
-  "AWS",
-  "GitOps",
-  "Observability",
-  "Security",
-  "CI/CD",
-];
+// const ALL_TAGS = [
+//   "All",
+//   "Kubernetes",
+//   "AWS",
+//   "GitOps",
+//   "Observability",
+//   "Security",
+//   "CI/CD",
+// ];
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -106,11 +106,11 @@ export function BlogPage() {
       }}
     >
       {/* Header */}
-      <section className="max-w-[1440px] mx-auto px-8 lg:px-16 py-16 border-b border-[rgba(225,253,255,0.1)]">
+      <section className="max-w-360 mx-auto px-8 lg:px-16 py-16 border-b border-[rgba(225,253,255,0.1)]">
         <div className="flex flex-col gap-4">
           <SectionHeader label="/VAR/LOG/BLOG" title="System Logs // Blog" />
           <p
-            className="text-[#b9cacb] text-[16px] leading-[26px] max-w-[600px]"
+            className="text-[#b9cacb] text-[16px] leading-6.5 max-w-150"
             style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
           >
             Technical deep dives, production war stories, and engineering
@@ -120,7 +120,7 @@ export function BlogPage() {
       </section>
 
       {/* Featured posts */}
-      <section className="max-w-[1440px] mx-auto px-8 lg:px-16 py-12">
+      <section className="max-w-360 mx-auto px-8 lg:px-16 py-12">
         <p
           className="text-[#b3c5ff] text-[12px] tracking-[1.4px] uppercase mb-6"
           style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}
@@ -133,7 +133,7 @@ export function BlogPage() {
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}
-              className="group backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] hover:border-[rgba(0,242,255,0.4)] transition-all overflow-hidden flex flex-col"
+              className="group backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] hover:border-[rgba(0,242,255,0.4)] transition-all overflow-hidden flex flex-col"
               style={{ background: "rgba(10,10,10,0.6)" }}
             >
               <div className="h-52 overflow-hidden border-b border-[rgba(0,242,255,0.15)]">
@@ -150,13 +150,13 @@ export function BlogPage() {
                   ))}
                 </div>
                 <h2
-                  className="text-[#e1fdff] text-[22px] leading-[30px] tracking-[-0.4px] group-hover:text-[#00F2FF] transition-colors"
+                  className="text-[#e1fdff] text-[22px] leading-7.5 tracking-[-0.4px] group-hover:text-[#00F2FF] transition-colors"
                   style={{ fontFamily: "'Geist', sans-serif", fontWeight: 700 }}
                 >
                   {post.title}
                 </h2>
                 <p
-                  className="text-[#b9cacb] text-[14px] leading-[22px] flex-1"
+                  className="text-[#b9cacb] text-[14px] leading-5.5 flex-1"
                   style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
                 >
                   {post.excerpt}
@@ -205,7 +205,7 @@ export function BlogPage() {
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}
-              className="group backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] hover:border-[rgba(0,242,255,0.4)] transition-all overflow-hidden flex flex-col md:flex-row"
+              className="group backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] hover:border-[rgba(0,242,255,0.4)] transition-all overflow-hidden flex flex-col md:flex-row"
               style={{ background: "rgba(10,10,10,0.6)" }}
             >
               <div className="w-full md:w-48 h-36 md:h-auto overflow-hidden shrink-0 border-b md:border-b-0 md:border-r border-[rgba(0,242,255,0.15)]">
@@ -222,13 +222,13 @@ export function BlogPage() {
                   ))}
                 </div>
                 <h3
-                  className="text-[#e1fdff] text-[18px] leading-[26px] tracking-[-0.3px] group-hover:text-[#00F2FF] transition-colors"
+                  className="text-[#e1fdff] text-[18px] leading-6.5 tracking-[-0.3px] group-hover:text-[#00F2FF] transition-colors"
                   style={{ fontFamily: "'Geist', sans-serif", fontWeight: 700 }}
                 >
                   {post.title}
                 </h3>
                 <p
-                  className="text-[#849495] text-[14px] leading-[22px] line-clamp-2"
+                  className="text-[#849495] text-[14px] leading-5.5 line-clamp-2"
                   style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
                 >
                   {post.excerpt}

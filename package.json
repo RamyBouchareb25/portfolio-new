@@ -10,6 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
+    "prisma:db-push": "prisma db push",
     "prisma:seed": "npx ts-node prisma/seed.ts"
   },
   "dependencies": {

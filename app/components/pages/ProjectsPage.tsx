@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
-import { ExternalLink, Github, ArrowRight } from "lucide-react";
+import {
+  ExternalLink,
+  Github,
+  //  ArrowRight
+} from "lucide-react";
 import { TerminalBadge } from "../shared/TerminalBadge";
 import { SectionHeader } from "../shared/SectionHeader";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
@@ -118,17 +122,17 @@ export function ProjectsPage() {
       }}
     >
       {/* Page Header */}
-      <section className="max-w-[1440px] mx-auto px-8 lg:px-16 py-16 border-b border-[rgba(225,253,255,0.1)]">
+      <section className="max-w-360 mx-auto px-8 lg:px-16 py-16 border-b border-[rgba(225,253,255,0.1)]">
         <div className="flex flex-col gap-6">
           <SectionHeader
             label="/VAR/PROJECTS"
             title="Infrastructure Projects"
           />
           <p
-            className="text-[#b9cacb] text-[16px] leading-[26px] max-w-[600px]"
+            className="text-[#b9cacb] text-[16px] leading-6.5 max-w-150"
             style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
           >
-            A catalog of production systems I've architected and deployed — each
+            A catalog of production systems I&apos;ve architected and deployed — each
             battle-tested under real traffic and real failure conditions.
           </p>
 
@@ -156,12 +160,12 @@ export function ProjectsPage() {
       </section>
 
       {/* Projects Grid */}
-      <section className="max-w-[1440px] mx-auto px-8 lg:px-16 py-16">
+      <section className="max-w-360 mx-auto px-8 lg:px-16 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtered.map((project) => (
             <article
               key={project.id}
-              className="group backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] hover:border-[rgba(0,242,255,0.4)] transition-all overflow-hidden flex flex-col"
+              className="group backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] hover:border-[rgba(0,242,255,0.4)] transition-all overflow-hidden flex flex-col"
               style={{ background: "rgba(10,10,10,0.6)" }}
             >
               {/* Project image */}
@@ -225,7 +229,7 @@ export function ProjectsPage() {
 
                 {/* Description */}
                 <p
-                  className="text-[#b9cacb] text-[14px] leading-[22px] flex-1"
+                  className="text-[#b9cacb] text-[14px] leading-5.5 flex-1"
                   style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
                 >
                   {project.description}

@@ -75,7 +75,7 @@ export function AdminDashboard() {
           <Link
             key={label}
             href={href}
-            className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.12)] p-5 hover:border-[rgba(0,242,255,0.3)] transition-colors flex flex-col gap-3"
+            className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.12)] p-5 hover:border-[rgba(0,242,255,0.3)] transition-colors flex flex-col gap-3"
             style={{ background: "rgba(10,10,10,0.6)" }}
           >
             <div className="flex items-center justify-between">
@@ -107,7 +107,7 @@ export function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent activity */}
         <div
-          className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.12)] p-6"
+          className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.12)] p-6"
           style={{ background: "rgba(10,10,10,0.6)" }}
         >
           <div className="flex items-center gap-2 mb-5">
@@ -169,7 +169,7 @@ export function AdminDashboard() {
 
         {/* Quick Actions */}
         <div
-          className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.12)] p-6"
+          className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.12)] p-6"
           style={{ background: "rgba(10,10,10,0.6)" }}
         >
           <span
@@ -219,7 +219,7 @@ export function AdminDashboard() {
 
       {/* Next.js + Payload CMS info banner */}
       <div
-        className="rounded-[4px] border border-[rgba(179,197,255,0.2)] p-5"
+        className="rounded-lg border border-[rgba(179,197,255,0.2)] p-5"
         style={{ background: "rgba(179,197,255,0.05)" }}
       >
         <p
@@ -229,7 +229,7 @@ export function AdminDashboard() {
           [INTEGRATION_STATUS]
         </p>
         <p
-          className="text-[#b9cacb] text-[13px] leading-[20px]"
+          className="text-[#b9cacb] text-[13px] leading-5"
           style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
         >
           Blog posts are managed via{" "}

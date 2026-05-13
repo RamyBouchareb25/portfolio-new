@@ -62,26 +62,26 @@ export function ContactPage() {
       }}
     >
       {/* Header */}
-      <section className="max-w-[1440px] mx-auto px-8 lg:px-16 py-16 border-b border-[rgba(225,253,255,0.1)]">
+      <section className="max-w-360 mx-auto px-8 lg:px-16 py-16 border-b border-[rgba(225,253,255,0.1)]">
         <div className="flex flex-col gap-4">
           <SectionHeader label="/CONNECT/NODE" title="Initialize Contact" />
           <p
-            className="text-[#b9cacb] text-[16px] leading-[26px] max-w-[600px]"
+            className="text-[#b9cacb] text-[16px] leading-6.5 max-w-150"
             style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
           >
-            Whether it's a new project, consulting opportunity, or just a technical discussion —
-            I'm always open to connecting with fellow engineers and teams building resilient systems.
+            Whether it&apos;s a new project, consulting opportunity, or just a technical discussion —
+            I&apos;m always open to connecting with fellow engineers and teams building resilient systems.
           </p>
         </div>
       </section>
 
-      <section className="max-w-[1440px] mx-auto px-8 lg:px-16 py-16">
+      <section className="max-w-360 mx-auto px-8 lg:px-16 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
           {/* Contact Form */}
           <div className="lg:col-span-3">
             {submitted ? (
               <div
-                className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.3)] p-10 flex flex-col items-center justify-center gap-4 text-center min-h-[400px]"
+                className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.3)] p-10 flex flex-col items-center justify-center gap-4 text-center min-h-100"
                 style={{ background: "rgba(10,10,10,0.6)" }}
               >
                 <CheckCircle size={48} className="text-[#00F2FF]" />
@@ -92,10 +92,10 @@ export function ContactPage() {
                   Message Sent
                 </h3>
                 <p
-                  className="text-[#b9cacb] text-[15px] leading-[24px] max-w-[400px]"
+                  className="text-[#b9cacb] text-[15px] leading-6 max-w-100"
                   style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
                 >
-                  Transmission received. I'll respond within 24–48 hours. Check your inbox.
+                  Transmission received. I&apos;ll respond within 24-48 hours. Check your inbox.
                 </p>
                 <p
                   className="text-[#849495] text-[12px] tracking-[1.2px]"
@@ -107,7 +107,7 @@ export function ContactPage() {
             ) : (
               <form
                 onSubmit={handleSubmit}
-                className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] p-8 flex flex-col gap-6"
+                className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] p-8 flex flex-col gap-6"
                 style={{ background: "rgba(10,10,10,0.6)" }}
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -197,7 +197,7 @@ export function ContactPage() {
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Social links */}
             <div
-              className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] p-6"
+              className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] p-6"
               style={{ background: "rgba(10,10,10,0.6)" }}
             >
               <p
@@ -239,7 +239,7 @@ export function ContactPage() {
 
             {/* FAQ */}
             <div
-              className="backdrop-blur-[6px] rounded-[4px] border border-[rgba(0,242,255,0.15)] p-6"
+              className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] p-6"
               style={{ background: "rgba(10,10,10,0.6)" }}
             >
               <p
@@ -252,13 +252,13 @@ export function ContactPage() {
                 {FAQ.map((item, i) => (
                   <div key={i} className="flex flex-col gap-1.5">
                     <p
-                      className="text-[#e1fdff] text-[13px] leading-[20px]"
+                      className="text-[#e1fdff] text-[13px] leading-5"
                       style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600 }}
                     >
                       {item.q}
                     </p>
                     <p
-                      className="text-[#b9cacb] text-[13px] leading-[20px]"
+                      className="text-[#b9cacb] text-[13px] leading-5"
                       style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
                     >
                       {item.a}
