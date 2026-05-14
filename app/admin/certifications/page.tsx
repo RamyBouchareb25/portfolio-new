@@ -1,7 +1,10 @@
-"use client";
-
 import { AdminCertifications } from "@/app/components/admin/AdminCertifications";
+import { getAdminCertifications } from "@/lib/admin-queries";
 
-export default function Page() {
-  return <AdminCertifications />;
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const certifications = await getAdminCertifications();
+
+  return <AdminCertifications initialCertifications={certifications} />;
 }

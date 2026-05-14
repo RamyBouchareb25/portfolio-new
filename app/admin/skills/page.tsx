@@ -1,7 +1,10 @@
-"use client";
-
 import { AdminSkills } from "@/app/components/admin/AdminSkills";
+import { getAdminSkills } from "@/lib/admin-queries";
 
-export default function Page() {
-  return <AdminSkills />;
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const skills = await getAdminSkills();
+
+  return <AdminSkills initialSkills={skills} />;
 }

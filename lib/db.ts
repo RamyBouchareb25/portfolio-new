@@ -102,9 +102,20 @@ export async function ensureAboutExists(): Promise<About> {
 }
 
 export async function updateAbout(data: Partial<About>): Promise<About> {
-  return prisma.about.update({
+  return prisma.about.upsert({
     where: { id: 1 },
-    data,
+    update: data,
+    create: {
+      id: 1,
+      name: data.name || "Your Name",
+      title: data.title || "Your Title",
+      summary: data.summary || "",
+      bio: data.bio || "",
+      yearsExp: data.yearsExp || "0",
+      deploymentsCount: data.deploymentsCount || "0",
+      uptimeSla: data.uptimeSla || "0",
+      clustersManaged: data.clustersManaged || "0",
+    },
   });
 }
 

@@ -244,7 +244,7 @@ function Content() {
         <Margin />
         <Heading />
         <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#b9cacb] text-[20px] text-center whitespace-nowrap">
-          <p className="leading-[28px]">{`DevOps, Kubernetes, & Cloud Architecture Expert`}</p>
+          <p className="leading-[28px]">{`DevOps, Kubernetes, & Cloud Architecture Enthusiast`}</p>
         </div>
         <Margin1 />
       </div>

@@ -92,3 +92,35 @@ export interface PaginatedResponse<T> {
   limit: number;
   hasMore: boolean;
 }
+
+export type Cert = Certification;
+
+export type AboutAdmin = {
+    name: string;
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+    title: string;
+    github: string | null;
+    summary: string;
+    bio: string;
+    location: string | null;
+    email: string | null;
+    linkedin: string | null;
+    twitter: string | null;
+    yearsExp: string;
+    deploymentsCount: string;
+    uptimeSla: string;
+    clustersManaged: string;
+} | null;
+
+export type CvFile = {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    size: string;
+    url: string;
+    filename: string;
+    active: boolean;
+    uploadedAt: Date;
+};

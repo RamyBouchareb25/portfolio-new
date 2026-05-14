@@ -105,7 +105,7 @@ export function HomePage() {
             className="text-[#b9cacb] text-xl max-w-150"
             style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
           >
-            DevOps, Kubernetes, &amp; Cloud Architecture Expert
+            DevOps, Kubernetes, &amp; Cloud Architecture Enthusiast
           </p>
 
           <div className="flex items-center gap-4 flex-wrap justify-center">

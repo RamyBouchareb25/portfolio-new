@@ -1,4 +1,6 @@
-import { ExternalLink, FileText, Settings } from "lucide-react";
+import { ExternalLink, FileText, 
+  // Settings
+ } from "lucide-react";
 
 const POSTS = [
   { id: 1, title: "Deep Dive: Running Kubernetes on Spot Instances", status: "published", date: "2024-01-15", views: 3420 },
@@ -64,7 +66,7 @@ export function AdminBlog() {
             POSTS SYNCED FROM PAYLOAD CMS
           </span>
           <span className="text-[#849495] text-[11px]" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 500 }}>
-            // read-only preview
+            {/* // read-only preview */}
           </span>
         </div>
         <table className="w-full">

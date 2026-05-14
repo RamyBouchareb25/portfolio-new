@@ -8,36 +8,36 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const STATS = [
-  {
-    icon: FolderOpen,
-    label: "Projects",
-    value: "6",
-    href: "/admin/projects",
-    color: "#00F2FF",
-  },
-  {
-    icon: Cpu,
-    label: "Skills",
-    value: "30+",
-    href: "/admin/skills",
-    color: "#b3c5ff",
-  },
-  {
-    icon: Award,
-    label: "Certifications",
-    value: "5",
-    href: "/admin/certifications",
-    color: "#e1fdff",
-  },
-  {
-    icon: FileText,
-    label: "Blog Posts",
-    value: "5",
-    href: "/admin/blog",
-    color: "#00F2FF",
-  },
-];
+// const STATS = [
+//   {
+//     icon: FolderOpen,
+//     label: "Projects",
+//     value: "6",
+//     href: "/admin/projects",
+//     color: "#00F2FF",
+//   },
+//   {
+//     icon: Cpu,
+//     label: "Skills",
+//     value: "30+",
+//     href: "/admin/skills",
+//     color: "#b3c5ff",
+//   },
+//   {
+//     icon: Award,
+//     label: "Certifications",
+//     value: "5",
+//     href: "/admin/certifications",
+//     color: "#e1fdff",
+//   },
+//   {
+//     icon: FileText,
+//     label: "Blog Posts",
+//     value: "5",
+//     href: "/admin/blog",
+//     color: "#00F2FF",
+//   },
+// ];
 
 const RECENT_ACTIVITY = [
   {
@@ -51,7 +51,50 @@ const RECENT_ACTIVITY = [
   { action: "Updated", entity: "About Me — Executive Summary", time: "2w ago" },
 ];
 
-export function AdminDashboard() {
+interface AdminDashboardProps {
+  projects?: any[];
+  skills?: any[];
+  blogPosts?: any[];
+  certifications?: any[];
+}
+
+export function AdminDashboard({
+  projects = [],
+  skills = [],
+  blogPosts = [],
+  certifications = [],
+}: AdminDashboardProps) {
+  const STATS_DATA = [
+    {
+      label: "Projects",
+      value: projects.length.toString(),
+      href: "/admin/projects",
+      color: "#00F2FF",
+      icon: FolderOpen,
+    },
+    {
+      label: "Skills",
+      value: skills.length ? `${skills.length}` : "0",
+      href: "/admin/skills",
+      color: "#b3c5ff",
+      icon: Cpu,
+    },
+    {
+      label: "Certifications",
+      value: certifications.length.toString(),
+      href: "/admin/certifications",
+      color: "#e1fdff",
+      icon: Award,
+    },
+    {
+      label: "Blog Posts",
+      value: blogPosts.length.toString(),
+      href: "/admin/blog",
+      color: "#00F2FF",
+      icon: FileText,
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -71,7 +114,7 @@ export function AdminDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {STATS.map(({ icon: Icon, label, value, href, color }) => (
+        {STATS_DATA.map(({ icon: Icon, label, value, href, color }) => (
           <Link
             key={label}
             href={href}
