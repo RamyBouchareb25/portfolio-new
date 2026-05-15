@@ -28,6 +28,9 @@ import {
   createCVFile,
   updateCVFileActive,
   deleteCVFile,
+  createPhotoFile,
+  updatePhotoFileActive,
+  deletePhotoFile,
 } from "./db";
 import type {
   About,
@@ -38,6 +41,7 @@ import type {
   BlogPost,
   CVFile,
 } from "@prisma/client";
+import type { PhotoAsset } from "./types";
 
 /**
  * Check if user is admin
@@ -520,6 +524,170 @@ export async function deleteCVFileAction(
       success: false,
       error:
         error instanceof Error ? error.message : "Failed to delete CV file",
+    };
+  }
+}
+
+// ============================================================================
+// PHOTO FILE ACTIONS
+// ============================================================================
+
+export async function uploadPhotoFileAction(
+  formData: FormData,
+): Promise<{ success: boolean; data?: PhotoAsset; error?: string }> {
+  try {
+    await requireAdmin();
+
+    const file = formData.get("file");
+    if (!(file instanceof File)) {
+      return { success: false, error: "No file was provided" };
+    }
+
+    if (!file.type.startsWith("image/")) {
+      return { success: false, error: "Only image files are allowed" };
+    }
+
+    const maxSizeBytes = 10 * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      return { success: false, error: "File is larger than 10MB" };
+    }
+
+    const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+    const bucket = process.env.AWS_BUCKET_NAME;
+    const region = process.env.AWS_REGION || "auto";
+    const endpoint = process.env.AWS_S3_ENDPOINT || process.env.R2_ENDPOINT;
+
+    if (!accessKeyId || !secretAccessKey || !bucket) {
+      return {
+        success: false,
+        error:
+          "Missing storage configuration. Set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_BUCKET_NAME.",
+      };
+    }
+
+    const client = new S3Client({
+      region,
+      endpoint,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
+    });
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const key = `photos/${Date.now()}-${safeName}`;
+
+    const body = Buffer.from(await file.arrayBuffer());
+    await client.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: body,
+        ContentType: file.type,
+      }),
+    );
+
+    const publicBaseUrl =
+      process.env.R2_PUBLIC_BASE_URL || process.env.AWS_PUBLIC_BASE_URL;
+
+    let fileUrl: string;
+    if (publicBaseUrl) {
+      const trimmedBase = publicBaseUrl.replace(/\/$/, "");
+      fileUrl = `${trimmedBase}/${key}`;
+    } else {
+      const trimmedEndpoint = endpoint?.replace(/\/$/, "");
+      if (trimmedEndpoint) {
+        fileUrl = `${trimmedEndpoint}/${bucket}/${key}`;
+      } else {
+        fileUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+      }
+    }
+
+    const created = await createPhotoFile({
+      filename: file.name,
+      url: fileUrl,
+      size: `${Math.round(file.size / 1024)} KB`,
+      active: false,
+    });
+
+    return { success: true, data: created };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to upload photo",
+    };
+  }
+}
+
+export async function setActivePhotoFileAction(
+  id: string,
+): Promise<{ success: boolean; data?: PhotoAsset; error?: string }> {
+  try {
+    await requireAdmin();
+    const result = await updatePhotoFileActive(id);
+    return { success: true, data: result };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to set active photo",
+    };
+  }
+}
+
+export async function deletePhotoFileAction(
+  id: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireAdmin();
+
+    const file = await (prisma as any).photoFile.findUnique({
+      where: { id },
+    });
+
+    if (!file) {
+      return { success: false, error: "Photo not found" };
+    }
+
+    const keyMatch = file.url.match(/photos\/[^\/]+$/);
+    if (keyMatch) {
+      const key = keyMatch[0];
+      const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+      const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+      const bucket = process.env.AWS_BUCKET_NAME;
+      const region = process.env.AWS_REGION || "auto";
+      const endpoint = process.env.AWS_S3_ENDPOINT || process.env.R2_ENDPOINT;
+
+      if (accessKeyId && secretAccessKey && bucket) {
+        try {
+          const client = new S3Client({
+            region,
+            endpoint,
+            credentials: {
+              accessKeyId,
+              secretAccessKey,
+            },
+          });
+
+          await client.send(
+            new DeleteObjectCommand({
+              Bucket: bucket,
+              Key: key,
+            }),
+          );
+        } catch (error) {
+          console.error("Failed to delete photo from storage:", error);
+        }
+      }
+    }
+
+    await deletePhotoFile(id);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to delete photo",
     };
   }
 }

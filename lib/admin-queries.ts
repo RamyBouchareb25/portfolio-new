@@ -7,6 +7,7 @@ import {
   getAllCertifications,
   getAllBlogPosts,
   getAllCVFiles,
+  getAllPhotoFiles,
 } from "./db";
 
 export async function getAdminAbout() {
@@ -59,6 +60,15 @@ export async function getAdminCVFiles() {
     return await getAllCVFiles();
   } catch (error) {
     console.error("Failed to fetch CV files:", error);
+    return [];
+  }
+}
+
+export async function getAdminPhotoFiles() {
+  try {
+    return await getAllPhotoFiles();
+  } catch (error) {
+    console.error("Failed to fetch photo files:", error);
     return [];
   }
 }

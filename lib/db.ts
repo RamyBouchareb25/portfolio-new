@@ -14,6 +14,7 @@ import type {
   CVFile,
   BlogPost,
 } from "@prisma/client";
+import type { PhotoAsset } from "./types";
 
 // ============================================================================
 // USER / AUTH OPERATIONS
@@ -98,6 +99,10 @@ export async function ensureAboutExists(): Promise<About> {
       title: "Your Title",
       summary: "",
       bio: "",
+      yearsExp: "0",
+      deploymentsCount: "0",
+      uptimeSla: "0",
+      clustersManaged: "0",
     },
   });
 }
@@ -336,6 +341,56 @@ export async function deleteCVFile(id: string): Promise<CVFile> {
 }
 
 // ============================================================================
+// PHOTO FILE OPERATIONS
+// ============================================================================
+
+export async function getActivePhotoFile(): Promise<PhotoAsset | null> {
+  return (prisma as any).photoFile.findFirst({
+    where: { active: true },
+  });
+}
+
+export async function getAllPhotoFiles(): Promise<PhotoAsset[]> {
+  return (prisma as any).photoFile.findMany({
+    orderBy: { uploadedAt: "desc" },
+  });
+}
+
+export async function createPhotoFile(
+  data: Omit<PhotoAsset, "id" | "createdAt" | "updatedAt" | "uploadedAt">,
+): Promise<PhotoAsset> {
+  if (data.active) {
+    await (prisma as any).photoFile.updateMany({
+      data: { active: false },
+    });
+  }
+
+  return (prisma as any).photoFile.create({
+    data: {
+      ...data,
+      uploadedAt: new Date(),
+    },
+  });
+}
+
+export async function updatePhotoFileActive(id: string): Promise<PhotoAsset> {
+  await (prisma as any).photoFile.updateMany({
+    data: { active: false },
+  });
+
+  return (prisma as any).photoFile.update({
+    where: { id },
+    data: { active: true },
+  });
+}
+
+export async function deletePhotoFile(id: string): Promise<PhotoAsset> {
+  return (prisma as any).photoFile.delete({
+    where: { id },
+  });
+}
+
+// ============================================================================
 // BLOG POST OPERATIONS
 // ============================================================================
 
@@ -408,7 +463,10 @@ export async function incrementBlogPostViews(
 export async function searchProjects(query: string): Promise<Project[]> {
   return prisma.project.findMany({
     where: {
-      OR: [{ title: { search: query } }, { description: { search: query } }],
+      OR: [
+        { title: { contains: query, mode: "insensitive" } },
+        { description: { contains: query, mode: "insensitive" } },
+      ],
     },
     orderBy: {
       _relevance: {
@@ -423,7 +481,10 @@ export async function searchProjects(query: string): Promise<Project[]> {
 export async function searchBlogPosts(query: string): Promise<BlogPost[]> {
   return prisma.blogPost.findMany({
     where: {
-      OR: [{ title: { search: query } }, { content: { search: query } }],
+      OR: [
+        { title: { contains: query, mode: "insensitive" } },
+        { content: { contains: query, mode: "insensitive" } },
+      ],
     },
     orderBy: {
       _relevance: {

@@ -96,31 +96,51 @@ export interface PaginatedResponse<T> {
 export type Cert = Certification;
 
 export type AboutAdmin = {
-    name: string;
-    id: number;
-    createdAt: Date;
-    updatedAt: Date;
-    title: string;
-    github: string | null;
-    summary: string;
-    bio: string;
-    location: string | null;
-    email: string | null;
-    linkedin: string | null;
-    twitter: string | null;
-    yearsExp: string;
-    deploymentsCount: string;
-    uptimeSla: string;
-    clustersManaged: string;
+  name: string;
+  id: number;
+  createdAt: Date;
+  updatedAt: Date;
+  title: string;
+  github: string | null;
+  summary: string;
+  bio: string;
+  location: string | null;
+  email: string | null;
+  linkedin: string | null;
+  twitter: string | null;
+  yearsExp: string;
+  deploymentsCount: string;
+  uptimeSla: string;
+  clustersManaged: string;
 } | null;
 
 export type CvFile = {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    size: string;
-    url: string;
-    filename: string;
-    active: boolean;
-    uploadedAt: Date;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  size: string;
+  url: string;
+  filename: string;
+  active: boolean;
+  uploadedAt: Date;
 };
+
+export type PhotoAsset = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  size: string;
+  url: string;
+  filename: string;
+  active: boolean;
+  uploadedAt: Date;
+};
+
+export type PhotoFileWithRelations = PhotoAsset;
+
+export type CreatePhotoFileInput = Omit<
+  PhotoAsset,
+  "id" | "createdAt" | "updatedAt" | "uploadedAt"
+>;
+
+export type UpdatePhotoFileInput = Partial<CreatePhotoFileInput>;

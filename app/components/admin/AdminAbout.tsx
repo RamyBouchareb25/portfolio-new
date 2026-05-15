@@ -1,9 +1,23 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useTransition } from "react";
-import { Save, CheckCircle } from "lucide-react";
-import { AboutAdmin } from "@/lib/types";
-import { updateAboutAction } from "@/lib/admin-actions";
+import {
+  Save,
+  CheckCircle,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  Star,
+  AlertCircle,
+} from "lucide-react";
+import { AboutAdmin, PhotoAsset } from "@/lib/types";
+import {
+  updateAboutAction,
+  uploadPhotoFileAction,
+  setActivePhotoFileAction,
+  deletePhotoFileAction,
+} from "@/lib/admin-actions";
 
 // const INITIAL = {
 //   name: "DevOps Engineer",
@@ -24,6 +38,7 @@ import { updateAboutAction } from "@/lib/admin-actions";
 
 interface AdminAboutProps {
   initialAbout: Partial<AboutAdmin>;
+  initialPhotoFiles: PhotoAsset[];
 }
 
 const EMPTY_ABOUT = {
@@ -42,16 +57,88 @@ const EMPTY_ABOUT = {
   clustersManaged: "",
 };
 
-export function AdminAbout({ initialAbout }: AdminAboutProps) {
+export function AdminAbout({
+  initialAbout,
+  initialPhotoFiles,
+}: AdminAboutProps) {
   const [form, setForm] = useState(() => ({
     ...EMPTY_ABOUT,
     ...(initialAbout ?? {}),
   }));
+  const [photoFiles, setPhotoFiles] = useState<PhotoAsset[]>(initialPhotoFiles);
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  const [photoUploadStatus, setPhotoUploadStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   function set(k: string, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  function handlePhotoInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Only image files are allowed");
+      return;
+    }
+    setSelectedPhoto(file);
+  }
+
+  function uploadPhoto() {
+    if (!selectedPhoto) return;
+    setPhotoUploadStatus("idle");
+
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("file", selectedPhoto);
+
+        const result = await uploadPhotoFileAction(formData);
+        if (!result.success || !result.data) {
+          throw new Error(result.error ?? "Failed to upload photo");
+        }
+
+        setPhotoFiles((files) => [result.data as PhotoAsset, ...files]);
+        setSelectedPhoto(null);
+        setPhotoUploadStatus("success");
+      } catch (error) {
+        console.error("Failed to upload photo:", error);
+        setPhotoUploadStatus("error");
+      }
+    });
+  }
+
+  function setActivePhoto(id: string) {
+    startTransition(async () => {
+      try {
+        const result = await setActivePhotoFileAction(id);
+        if (!result.success) {
+          throw new Error(result.error ?? "Failed to set active photo");
+        }
+        setPhotoFiles((files) =>
+          files.map((f) => ({ ...f, active: f.id === id })),
+        );
+      } catch (error) {
+        console.error("Failed to set active photo:", error);
+      }
+    });
+  }
+
+  function deletePhoto(id: string) {
+    startTransition(async () => {
+      try {
+        const result = await deletePhotoFileAction(id);
+        if (!result.success) {
+          throw new Error(result.error ?? "Failed to delete photo");
+        }
+        setPhotoFiles((files) => files.filter((f) => f.id !== id));
+      } catch (error) {
+        console.error("Failed to delete photo:", error);
+      }
+    });
   }
 
   function handleSave(e: React.FormEvent<HTMLFormElement>) {
@@ -271,6 +358,150 @@ export function AdminAbout({ initialAbout }: AdminAboutProps) {
                   value={(form as any)[k]}
                   onChange={(e) => set(k, e.target.value)}
                 />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Profile Photos */}
+        <div
+          className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.12)] p-6 flex flex-col gap-4 lg:col-span-2"
+          style={{ background: "rgba(10,10,10,0.6)" }}
+        >
+          <p
+            className="text-[#b3c5ff] text-[12px] tracking-[1.4px] uppercase"
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontWeight: 700,
+            }}
+          >
+            [PROFILE_PHOTOS]
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <label
+              className="flex items-center gap-2 px-4 py-2 border border-[rgba(225,253,255,0.3)] text-[#e1fdff] rounded-[2px] text-[12px] tracking-[1.2px] uppercase cursor-pointer hover:border-[rgba(225,253,255,0.6)] transition-colors"
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 700,
+              }}
+            >
+              <ImageIcon size={12} /> SELECT_IMAGE
+              <input
+                disabled={isPending}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoInput}
+              />
+            </label>
+
+            {selectedPhoto && (
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={uploadPhoto}
+                className="flex items-center gap-2 bg-[#e1fdff] text-[#00363a] px-4 py-2 rounded-[2px] text-[12px] tracking-[1.2px] uppercase hover:opacity-90 transition-opacity disabled:opacity-60"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontWeight: 700,
+                }}
+              >
+                <Upload size={12} /> UPLOAD_TO_PHOTOS
+              </button>
+            )}
+          </div>
+
+          {photoUploadStatus === "success" && (
+            <div
+              className="flex items-center gap-2 p-3 rounded-[2px] border border-[rgba(0,242,255,0.3)] bg-[rgba(0,242,255,0.05)] text-[#00F2FF] text-[13px]"
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 500,
+              }}
+            >
+              <CheckCircle size={14} /> PHOTO_UPLOADED
+            </div>
+          )}
+
+          {photoUploadStatus === "error" && (
+            <div
+              className="flex items-center gap-2 p-3 rounded-[2px] border border-[rgba(255,80,80,0.3)] bg-[rgba(255,80,80,0.05)] text-red-400 text-[13px]"
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 500,
+              }}
+            >
+              <AlertCircle size={14} /> PHOTO_UPLOAD_FAILED
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {photoFiles.map((photo) => (
+              <div
+                key={photo.id}
+                className={`rounded-[4px] border p-3 flex flex-col gap-3 ${
+                  photo.active
+                    ? "border-[rgba(0,242,255,0.4)] bg-[rgba(0,242,255,0.04)]"
+                    : "border-[rgba(225,253,255,0.1)] bg-[rgba(10,10,10,0.5)]"
+                }`}
+              >
+                <div className="relative aspect-square rounded-[4px] overflow-hidden border border-[rgba(225,253,255,0.1)]">
+                  <Image
+                    src={photo.url}
+                    alt={photo.filename}
+                    fill
+                    unoptimized
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className="text-[#e1fdff] text-[12px] truncate"
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {photo.filename}
+                  </span>
+                  {photo.active && (
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded-[2px] bg-[rgba(0,242,255,0.1)] text-[#00F2FF] border border-[rgba(0,242,255,0.3)]"
+                      style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontWeight: 700,
+                      }}
+                    >
+                      ACTIVE
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {!photo.active && (
+                    <button
+                      type="button"
+                      onClick={() => setActivePhoto(photo.id)}
+                      className="flex-1 flex items-center justify-center gap-1 text-[11px] px-2 py-1.5 border border-[rgba(0,242,255,0.3)] text-[#00F2FF] rounded-[2px] hover:bg-[rgba(0,242,255,0.08)] transition-colors"
+                      style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontWeight: 500,
+                      }}
+                    >
+                      <Star size={12} /> SET ACTIVE
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => deletePhoto(photo.id)}
+                    className="px-2 py-1.5 text-[#849495] hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

@@ -1,16 +1,23 @@
+import Image from "next/image";
 import { Download } from "lucide-react";
 import { SectionHeader } from "../shared/SectionHeader";
 import { TerminalBadge } from "../shared/TerminalBadge";
 import type { About, Experience } from "@prisma/client";
-import type { CvFile } from "@/lib/types";
+import type { CvFile, PhotoAsset } from "@/lib/types";
 
 interface AboutPageProps {
   aboutData?: About | null;
   experiences?: Experience[];
   cv?: CvFile | null;
+  photo?: PhotoAsset | null;
 }
 
-export function AboutPage({ aboutData, experiences = [], cv }: AboutPageProps) {
+export function AboutPage({
+  aboutData,
+  experiences = [],
+  cv,
+  photo,
+}: AboutPageProps) {
   // Use provided experiences or empty array
   const experienceList = experiences.length > 0 ? experiences : [];
   return (
@@ -71,18 +78,29 @@ export function AboutPage({ aboutData, experiences = [], cv }: AboutPageProps) {
             className="backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] p-6"
             style={{ background: "rgba(10,10,10,0.6)" }}
           >
-            <div className="w-20 h-20 rounded-full bg-linear-to-br from-[rgba(0,242,255,0.2)] to-[rgba(179,197,255,0.1)] border border-[rgba(0,242,255,0.3)] flex items-center justify-center mb-5">
-              <span
-                className="text-[#00F2FF] text-[24px]"
-                style={{ fontFamily: "'Geist', sans-serif", fontWeight: 800 }}
-              >
-                {(aboutData?.name || "K8")
-                  .split(" ")
-                  .map((word: string) => word[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2) || "K8"}
-              </span>
+            <div className="relative w-20 h-20 rounded-full bg-linear-to-br from-[rgba(0,242,255,0.2)] to-[rgba(179,197,255,0.1)] border border-[rgba(0,242,255,0.3)] flex items-center justify-center mb-5 overflow-hidden">
+              {photo?.url ? (
+                <Image
+                  src={photo.url}
+                  alt={aboutData?.name || "Profile photo"}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                  sizes="80px"
+                />
+              ) : (
+                <span
+                  className="text-[#00F2FF] text-[24px]"
+                  style={{ fontFamily: "'Geist', sans-serif", fontWeight: 800 }}
+                >
+                  {(aboutData?.name || "K8")
+                    .split(" ")
+                    .map((word: string) => word[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2) || "K8"}
+                </span>
+              )}
             </div>
             <h3
               className="text-[#e1fdff] text-[20px] tracking-[-0.4px] mb-1"

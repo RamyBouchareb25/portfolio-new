@@ -227,6 +227,27 @@ model CVFile {
 }
 
 // ============================================================================
+// PHOTO FILE MODEL
+// ============================================================================
+// Represents uploaded profile photos stored in S3/R2
+model PhotoFile {
+    id       String @id @default(cuid())
+    filename String
+    url      String
+    size     String
+
+    // Mark one as the active/current profile image
+    active Boolean @default(false)
+
+    uploadedAt DateTime @default(now())
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    @@index([active])
+    @@map("photo_files")
+}
+
+// ============================================================================
 // BLOG POST MODEL
 // ============================================================================
 // Represents blog posts (synced from Payload CMS or stored directly)

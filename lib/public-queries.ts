@@ -8,6 +8,7 @@ import {
   getAllCertifications,
   getAllBlogPosts,
   getActiveCVFile,
+  getActivePhotoFile,
 } from "./db";
 
 export async function getPublicAbout() {
@@ -69,6 +70,15 @@ export async function getPublicActiveCV() {
     return await getActiveCVFile();
   } catch (error) {
     console.error("Failed to fetch active CV:", error);
+    return null;
+  }
+}
+
+export async function getPublicActivePhoto() {
+  try {
+    return await getActivePhotoFile();
+  } catch (error) {
+    console.error("Failed to fetch active photo:", error);
     return null;
   }
 }

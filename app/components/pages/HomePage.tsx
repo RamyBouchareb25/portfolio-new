@@ -134,8 +134,8 @@ export function HomePage({ featuredProjects = [], about, cv }: HomePageProps) {
         </div>
 
         {/* Terminal status bar */}
-        <div className="absolute bottom-0 left-0 right-0 backdrop-blur-[6px] bg-[rgba(10,10,10,0.6)] border-t border-[rgba(0,242,255,0.15)] px-8 lg:px-16 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-6 flex-wrap">
+        <div className="relative lg:absolute backdrop-blur-[6px] bg-[rgba(10,10,10,0.6)] lg:bottom-0 left-0 right-0 mt-4 lg:mt-0 border-t border-[rgba(0,242,255,0.15)] px-4 lg:px-16 py-2 flex items-center justify-between flex-wrap gap-4 z-10">
+          <div className="flex items-center gap-6 flex-wrap w-full lg:w-auto">
             {[
               { key: "[SYS_HEALTH]", val: "100% OK" },
               { key: "[REGION]", val: "DZ-WEST-1" },
@@ -156,7 +156,7 @@ export function HomePage({ featuredProjects = [], about, cv }: HomePageProps) {
             ))}
           </div>
           <span
-            className="text-[#849495] text-[14px] tracking-[0.28px]"
+            className="text-[#849495] text-[14px] tracking-[0.28px] w-full lg:w-auto text-right"
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontWeight: 500,

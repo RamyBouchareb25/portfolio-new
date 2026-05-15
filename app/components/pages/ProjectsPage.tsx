@@ -9,25 +9,20 @@ import {
 import { TerminalBadge } from "../shared/TerminalBadge";
 import { SectionHeader } from "../shared/SectionHeader";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
-const ALL_TAGS = [
-  "All",
-  "Kubernetes",
-  "AWS",
-  "Terraform",
-  "CI/CD",
-  "Observability",
-  "Security",
-  "Networking",
-];
 
 interface ProjectsPageProps {
   projects?: any[];
+  availableTags?: string[];
 }
 
-export function ProjectsPage({ projects = [] }: ProjectsPageProps) {
+export function ProjectsPage({
+  projects = [],
+  availableTags = [],
+}: ProjectsPageProps) {
   const [activeTag, setActiveTag] = useState("All");
 
   const projectList = projects && projects.length > 0 ? projects : [];
+  const filterTags = ["All", ...availableTags];
 
   const filtered =
     activeTag === "All"
@@ -60,7 +55,7 @@ export function ProjectsPage({ projects = [] }: ProjectsPageProps) {
 
           {/* Filter tags */}
           <div className="flex flex-wrap gap-2 pt-2">
-            {ALL_TAGS.map((tag) => (
+            {filterTags.map((tag) => (
               <button
                 key={tag}
                 onClick={() => setActiveTag(tag)}
