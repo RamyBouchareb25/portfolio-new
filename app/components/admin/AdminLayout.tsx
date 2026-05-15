@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  FlaskConicalIcon,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { icon: Cpu, label: "Skills", href: "/admin/skills" },
   { icon: Award, label: "Certifications", href: "/admin/certifications" },
   { icon: FileText, label: "Blog (Payload CMS)", href: "/admin/blog" },
+  { icon: FlaskConicalIcon, label: "Experiences", href: "/admin/experiences" },
   { icon: Upload, label: "CV / Resume", href: "/admin/cv" },
 ];
 

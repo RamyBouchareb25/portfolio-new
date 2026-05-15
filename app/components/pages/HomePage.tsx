@@ -10,53 +10,40 @@ import {
 import { TerminalBadge } from "../shared/TerminalBadge";
 import { SectionHeader } from "../shared/SectionHeader";
 // import { ImageWithFallback } from "../figma/ImageWithFallback";
-
-const STATS = [
-  { value: "10+", label: "YEARS EXP" },
-  { value: "500+", label: "DEPLOYMENTS" },
-  { value: "99.9%", label: "UPTIME SLA" },
-  { value: "50+", label: "CLUSTERS" },
-];
+import type { About } from "@prisma/client";
+import type { CvFile } from "@/lib/types";
 
 const SKILL_TAGS = [
   "Kubernetes",
   "Terraform",
-  "AWS",
+  // "AWS",
   "CI/CD",
-  "Prometheus",
+  "Elastic Stack",
   "Helm",
   "ArgoCD",
-  "Istio",
 ];
 
-const FEATURED_PROJECTS = [
-  {
-    id: 1,
-    title: "Multi-Region K8s Cluster",
-    description:
-      "Highly available Kubernetes infrastructure spanning 3 AWS regions with automatic failover and zero-downtime deployments.",
-    tags: ["Kubernetes", "AWS", "Terraform"],
-    status: "PRODUCTION",
-  },
-  {
-    id: 2,
-    title: "GitOps Pipeline Framework",
-    description:
-      "Complete GitOps workflow with ArgoCD, automated testing gates, and progressive delivery using Flagger.",
-    tags: ["ArgoCD", "FluxCD", "GitHub Actions"],
-    status: "ACTIVE",
-  },
-  {
-    id: 3,
-    title: "Observability Stack",
-    description:
-      "Full observability platform with Prometheus, Grafana, Loki and OpenTelemetry for distributed tracing.",
-    tags: ["Prometheus", "Grafana", "Loki"],
-    status: "PRODUCTION",
-  },
-];
+interface Project {
+  id: number;
+  title: string;
+  description: string;
+  tags: string[];
+  status: string;
+}
 
-export function HomePage() {
+interface HomePageProps {
+  featuredProjects: Project[];
+  about: About | null;
+  cv?: CvFile | null;
+}
+
+export function HomePage({ featuredProjects = [], about, cv }: HomePageProps) {
+  const STATS = [
+    { value: about?.yearsExp || "10+", label: "YEARS EXP" },
+    { value: about?.deploymentsCount || "500+", label: "DEPLOYMENTS" },
+    { value: about?.uptimeSla || "99.9%", label: "UPTIME SLA" },
+    { value: about?.clustersManaged || "50+", label: "CLUSTERS" },
+  ];
   return (
     <div
       className="min-h-screen"
@@ -96,16 +83,22 @@ export function HomePage() {
             className="text-[#e1fdff] text-5xl lg:text-[80px] leading-[1.1] tracking-[-3.2px] drop-shadow-[0_0_12.5px_rgba(0,242,255,0.3)]"
             style={{ fontFamily: "'Geist', sans-serif", fontWeight: 800 }}
           >
-            Orchestrating Resilient
-            <br />
-            Systems at Scale
+            <>
+              Orchestrating Resilient
+              <br />
+              Systems at Scale
+            </>
+            {/* {about?.title || (
+            )} */}
           </h1>
 
           <p
             className="text-[#b9cacb] text-xl max-w-150"
             style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
           >
-            DevOps, Kubernetes, &amp; Cloud Architecture Enthusiast
+            DevOps, Kubernetes, & Cloud Architecture Enthusiast
+            {/* {about?.summary ||
+              } */}
           </p>
 
           <div className="flex items-center gap-4 flex-wrap justify-center">
@@ -120,9 +113,15 @@ export function HomePage() {
               VIEW PROJECTS
             </Link>
             <a
-              href="#"
+              href={
+                cv?.url
+                  ? `/api/cv/download?url=${encodeURIComponent(cv.url)}&filename=${encodeURIComponent(cv.filename ?? "resume.pdf")}`
+                  : "#"
+              }
               download
-              className="flex items-center gap-2 border border-[rgba(225,253,255,0.5)] text-[#e1fdff] px-8 py-4 rounded-[2px] text-[12px] tracking-[1.2px] uppercase hover:border-[rgba(225,253,255,0.8)] transition-colors"
+              className={`flex items-center gap-2 border border-[rgba(225,253,255,0.5)] text-[#e1fdff] px-8 py-4 rounded-[2px] text-[12px] tracking-[1.2px] uppercase hover:border-[rgba(225,253,255,0.8)] transition-colors ${
+                cv ? "" : "opacity-50 pointer-events-none"
+              }`}
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontWeight: 700,
@@ -139,7 +138,7 @@ export function HomePage() {
           <div className="flex items-center gap-6 flex-wrap">
             {[
               { key: "[SYS_HEALTH]", val: "100% OK" },
-              { key: "[REGION]", val: "US-EAST-1" },
+              { key: "[REGION]", val: "DZ-WEST-1" },
               { key: "[LOG]", val: "CLUSTER_READY" },
               { key: "[LOG]", val: "PODS_SCALING..." },
             ].map((item, i) => (
@@ -192,11 +191,12 @@ export function HomePage() {
                 className="text-[#b9cacb] text-[16px] leading-6.5 mb-6"
                 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
               >
-                I architect, deploy, and maintain highly available
+                {about?.bio ||
+                  `I architect, deploy, and maintain highly available
                 infrastructure for mission-critical applications. My approach
                 focuses on infrastructure as code, zero-downtime deployments,
                 and robust observability to ensure systems run flawlessly under
-                pressure.
+                pressure.`}
               </p>
               <div className="flex flex-wrap gap-2">
                 {SKILL_TAGS.map((tag) => (
@@ -287,7 +287,7 @@ export function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {FEATURED_PROJECTS.map((project) => (
+            {featuredProjects.map((project: Project) => (
               <div
                 key={project.id}
                 className="group backdrop-blur-[6px] rounded-lg border border-[rgba(0,242,255,0.15)] p-6 hover:border-[rgba(0,242,255,0.4)] transition-colors cursor-pointer"
@@ -357,8 +357,8 @@ export function HomePage() {
             className="text-[#b9cacb] text-[16px] leading-6.5 mb-8"
             style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
           >
-            Let&apos;s build something resilient together. I&apos;m available for
-            consulting, full-time opportunities, and infrastructure audits.
+            Let&apos;s build something resilient together. I&apos;m available
+            for consulting, full-time opportunities, and infrastructure audits.
           </p>
           <Link
             href="/contact"

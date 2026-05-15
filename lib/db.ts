@@ -8,6 +8,7 @@ import type {
   User,
   About,
   Project,
+  Experience,
   Skill,
   Certification,
   CVFile,
@@ -162,6 +163,46 @@ export async function updateProject(
 
 export async function deleteProject(id: number): Promise<Project> {
   return prisma.project.delete({
+    where: { id },
+  });
+}
+
+// ============================================================================
+// EXPERIENCE OPERATIONS
+// ============================================================================
+
+export async function getAllExperiences(): Promise<Experience[]> {
+  return prisma.experience.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getExperience(id: number): Promise<Experience | null> {
+  return prisma.experience.findUnique({
+    where: { id },
+  });
+}
+
+export async function createExperience(
+  data: Omit<Experience, "id" | "createdAt" | "updatedAt">,
+): Promise<Experience> {
+  return prisma.experience.create({
+    data,
+  });
+}
+
+export async function updateExperience(
+  id: number,
+  data: Partial<Experience>,
+): Promise<Experience> {
+  return prisma.experience.update({
+    where: { id },
+    data,
+  });
+}
+
+export async function deleteExperience(id: number): Promise<Experience> {
+  return prisma.experience.delete({
     where: { id },
   });
 }

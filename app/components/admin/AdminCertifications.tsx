@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, X, Save, Award } from "lucide-react";
 import { Cert } from "@/lib/types";
 import {
   createCertificationAction,
+  deleteCertificationAction,
   updateCertificationAction,
 } from "@/lib/admin-actions";
 
@@ -366,8 +367,28 @@ export function AdminCertifications({
               </button>
               <button
                 onClick={() => {
-                  setCerts((cs) => cs.filter((c) => c.id !== deleteId));
-                  setDeleteId(null);
+                  if (deleteId == null) return;
+                  startTransition(async () => {
+                    try {
+                      const result = await deleteCertificationAction(deleteId);
+                      if (!result.success) {
+                        throw new Error(
+                          result.error ?? "Failed to delete certification",
+                        );
+                      }
+
+                      setCerts((cs) => cs.filter((c) => c.id !== deleteId));
+                      setDeleteId(null);
+                    } catch (error) {
+                      alert(
+                        `Error: ${
+                          error instanceof Error
+                            ? error.message
+                            : "Unknown error"
+                        }`,
+                      );
+                    }
+                  });
                 }}
                 className="px-5 py-2 bg-red-500 text-white rounded-[2px] text-[12px]"
                 style={{

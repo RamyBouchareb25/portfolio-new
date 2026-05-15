@@ -1,13 +1,21 @@
 "use server";
 
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  PutObjectCommand,
+  DeleteObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth.config";
+import { prisma } from "./prisma";
 import {
   updateAbout,
   createProject,
   updateProject,
   deleteProject,
+  createExperience,
+  updateExperience,
+  deleteExperience,
   createSkill,
   updateSkill,
   deleteSkill,
@@ -24,6 +32,7 @@ import {
 import type {
   About,
   Project,
+  Experience,
   Skill,
   Certification,
   BlogPost,
@@ -108,6 +117,59 @@ export async function deleteProjectAction(
       success: false,
       error:
         error instanceof Error ? error.message : "Failed to delete project",
+    };
+  }
+}
+
+// ============================================================================
+// EXPERIENCE ACTIONS
+// ============================================================================
+
+export async function createExperienceAction(
+  data: Omit<Experience, "id" | "createdAt" | "updatedAt">,
+): Promise<{ success: boolean; data?: Experience; error?: string }> {
+  try {
+    await requireAdmin();
+    const result = await createExperience(data);
+    return { success: true, data: result };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to create experience",
+    };
+  }
+}
+
+export async function updateExperienceAction(
+  id: number,
+  data: Partial<Experience>,
+): Promise<{ success: boolean; data?: Experience; error?: string }> {
+  try {
+    await requireAdmin();
+    const result = await updateExperience(id, data);
+    return { success: true, data: result };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to update experience",
+    };
+  }
+}
+
+export async function deleteExperienceAction(
+  id: number,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireAdmin();
+    await deleteExperience(id);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to delete experience",
     };
   }
 }
@@ -351,15 +413,22 @@ export async function uploadCVFileAction(
     );
 
     const publicBaseUrl =
-      process.env.AWS_PUBLIC_BASE_URL || process.env.R2_PUBLIC_BASE_URL;
-    const trimmedBase = publicBaseUrl?.replace(/\/$/, "");
-    const trimmedEndpoint = endpoint?.replace(/\/$/, "");
+      process.env.R2_PUBLIC_BASE_URL || process.env.AWS_PUBLIC_BASE_URL;
 
-    const fileUrl = trimmedBase
-      ? `${trimmedBase}/${key}`
-      : trimmedEndpoint
-        ? `${trimmedEndpoint}/${bucket}/${key}`
-        : `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+    // Always prefer public URL if available
+    let fileUrl: string;
+    if (publicBaseUrl) {
+      const trimmedBase = publicBaseUrl.replace(/\/$/, "");
+      fileUrl = `${trimmedBase}/${key}`;
+    } else {
+      // Fallback to endpoint-based URL
+      const trimmedEndpoint = endpoint?.replace(/\/$/, "");
+      if (trimmedEndpoint) {
+        fileUrl = `${trimmedEndpoint}/${bucket}/${key}`;
+      } else {
+        fileUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+      }
+    }
 
     const created = await createCVFile({
       filename: file.name,
@@ -398,6 +467,52 @@ export async function deleteCVFileAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await requireAdmin();
+
+    // Get the file record to extract the S3 key
+    const file = await prisma.cVFile.findUnique({
+      where: { id },
+    });
+
+    if (!file) {
+      return { success: false, error: "File not found" };
+    }
+
+    // Extract S3 key from URL (key is in format cv/{timestamp}-{filename})
+    const keyMatch = file.url.match(/cv\/[^\/]+$/);
+    if (keyMatch) {
+      const key = keyMatch[0];
+      const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+      const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+      const bucket = process.env.AWS_BUCKET_NAME;
+      const region = process.env.AWS_REGION || "auto";
+      const endpoint = process.env.AWS_S3_ENDPOINT || process.env.R2_ENDPOINT;
+
+      if (accessKeyId && secretAccessKey && bucket) {
+        try {
+          const client = new S3Client({
+            region,
+            endpoint,
+            credentials: {
+              accessKeyId,
+              secretAccessKey,
+            },
+          });
+
+          // Delete from S3/R2
+          await client.send(
+            new DeleteObjectCommand({
+              Bucket: bucket,
+              Key: key,
+            }),
+          );
+        } catch (error) {
+          console.error("Failed to delete from storage:", error);
+          // Continue with DB deletion even if S3 deletion fails
+        }
+      }
+    }
+
+    // Delete from database
     await deleteCVFile(id);
     return { success: true };
   } catch (error) {

@@ -115,6 +115,26 @@ model About {
 }
 
 // ============================================================================
+// EXPERIENCE MODEL
+// ============================================================================
+// Represents work experience entries with role, company, period, location, and bullets
+model Experience {
+    id       Int    @id @default(autoincrement())
+    role     String // Job title (e.g., "Senior Platform Engineer")
+    company  String // Company name
+    period   String // Time period (e.g., "2022 – Present")
+    location String // Work location (e.g., "Remote")
+
+    // Bullets stored as JSON array
+    bullets String[] // List of achievements/responsibilities
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("experiences")
+}
+
+// ============================================================================
 // PROJECT MODEL
 // ============================================================================
 // Represents portfolio projects showcasing work experience

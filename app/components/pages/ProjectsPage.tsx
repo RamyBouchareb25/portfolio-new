@@ -3,13 +3,12 @@ import { useState } from "react";
 import {
   ExternalLink,
   Github,
+  FolderKanban,
   //  ArrowRight
 } from "lucide-react";
 import { TerminalBadge } from "../shared/TerminalBadge";
 import { SectionHeader } from "../shared/SectionHeader";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
-import imgArchitecture from "@/app/imports/ProjectsInfraLogs/a233f853c9ab7822d6a88b66f93a25c675b77d8d.png";
-
 const ALL_TAGS = [
   "All",
   "Kubernetes",
@@ -21,96 +20,19 @@ const ALL_TAGS = [
   "Networking",
 ];
 
-const PROJECTS = [
-  {
-    id: 1,
-    title: "Multi-Region Kubernetes Cluster",
-    slug: "multi-region-k8s",
-    description:
-      "Highly available Kubernetes infrastructure spanning 3 AWS regions with automatic failover, global load balancing, and zero-downtime deployments using canary releases.",
-    longDescription:
-      "This project implements a production-grade multi-region Kubernetes setup with cross-cluster service mesh, automated failover, and GitOps-driven deployments.",
-    tags: ["Kubernetes", "AWS", "Terraform"],
-    status: "PRODUCTION",
-    metrics: { uptime: "99.99%", latency: "<50ms", nodes: "180+" },
-    image: null,
-    github: "https://github.com",
-    demo: null,
-  },
-  {
-    id: 2,
-    title: "GitOps Pipeline Framework",
-    slug: "gitops-pipeline",
-    description:
-      "Complete GitOps workflow with ArgoCD, automated testing gates, progressive delivery using Flagger, and automated rollback on SLO violations.",
-    tags: ["CI/CD", "Kubernetes", "Terraform"],
-    status: "ACTIVE",
-    metrics: { deployments: "500+", rollbacks: "0", coverage: "95%" },
-    image: null,
-    github: "https://github.com",
-    demo: null,
-  },
-  {
-    id: 3,
-    title: "Full Observability Stack",
-    slug: "observability-stack",
-    description:
-      "Enterprise observability platform with Prometheus, Grafana, Loki for log aggregation, Tempo for distributed tracing, and custom dashboards.",
-    tags: ["Observability", "Kubernetes", "AWS"],
-    status: "PRODUCTION",
-    metrics: { metrics: "2M+/min", retention: "90 days", alerts: "200+" },
-    image: imgArchitecture,
-    github: "https://github.com",
-    demo: "https://grafana.example.com",
-  },
-  {
-    id: 4,
-    title: "Zero-Trust Network Policy",
-    slug: "zero-trust-network",
-    description:
-      "Implemented eBPF-based network policies with Cilium, mTLS enforcement via Istio service mesh, and comprehensive network flow logging.",
-    tags: ["Security", "Networking", "Kubernetes"],
-    status: "PRODUCTION",
-    metrics: { policies: "500+", coverage: "100%", incidents: "0" },
-    image: null,
-    github: "https://github.com",
-    demo: null,
-  },
-  {
-    id: 5,
-    title: "Disaster Recovery Automation",
-    slug: "dr-automation",
-    description:
-      "Automated DR testing framework with Velero backups, cross-region replication, chaos engineering with LitmusChaos, and RTO <15min.",
-    tags: ["AWS", "Kubernetes", "Terraform"],
-    status: "ACTIVE",
-    metrics: { rto: "<15min", rpo: "<1min", tests: "Weekly" },
-    image: null,
-    github: "https://github.com",
-    demo: null,
-  },
-  {
-    id: 6,
-    title: "Cost Optimization Platform",
-    slug: "cost-optimization",
-    description:
-      "Reduced AWS costs by 65% through spot instance automation, right-sizing recommendations, and Karpenter for intelligent node provisioning.",
-    tags: ["AWS", "Kubernetes", "Observability"],
-    status: "PRODUCTION",
-    metrics: { savings: "65%", monthly: "$45K+", nodes: "Dynamic" },
-    image: null,
-    github: "https://github.com",
-    demo: null,
-  },
-];
+interface ProjectsPageProps {
+  projects?: any[];
+}
 
-export function ProjectsPage() {
+export function ProjectsPage({ projects = [] }: ProjectsPageProps) {
   const [activeTag, setActiveTag] = useState("All");
+
+  const projectList = projects && projects.length > 0 ? projects : [];
 
   const filtered =
     activeTag === "All"
-      ? PROJECTS
-      : PROJECTS.filter((p) => p.tags.includes(activeTag));
+      ? projectList
+      : projectList.filter((p) => (p.tags || []).includes(activeTag));
 
   return (
     <div
@@ -132,8 +54,8 @@ export function ProjectsPage() {
             className="text-[#b9cacb] text-[16px] leading-6.5 max-w-150"
             style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
           >
-            A catalog of production systems I&apos;ve architected and deployed — each
-            battle-tested under real traffic and real failure conditions.
+            A catalog of production systems I&apos;ve architected and deployed —
+            each battle-tested under real traffic and real failure conditions.
           </p>
 
           {/* Filter tags */}
@@ -238,7 +160,9 @@ export function ProjectsPage() {
                 {/* Metrics */}
                 {project.metrics && (
                   <div className="grid grid-cols-3 gap-3 pt-2 border-t border-[rgba(225,253,255,0.08)]">
-                    {Object.entries(project.metrics).map(([key, val]) => (
+                    {Object.entries(
+                      project.metrics as Record<string, string>,
+                    ).map(([key, val]) => (
                       <div key={key} className="text-center">
                         <div
                           className="text-[#e1fdff] text-[14px] tracking-[-0.3px]"
@@ -265,7 +189,7 @@ export function ProjectsPage() {
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag) => (
+                  {project.tags.map((tag: string) => (
                     <TerminalBadge key={tag}>{tag}</TerminalBadge>
                   ))}
                 </div>
@@ -276,15 +200,18 @@ export function ProjectsPage() {
 
         {filtered.length === 0 && (
           <div className="text-center py-24">
-            <p
-              className="text-[#849495] text-[14px] tracking-[0.28px]"
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontWeight: 500,
-              }}
-            >
-              NO_PROJECTS_FOUND // Filter: {activeTag}
-            </p>
+            <div className="inline-flex items-center gap-2 rounded-[2px] border border-[rgba(225,253,255,0.12)] bg-[rgba(10,10,10,0.55)] px-4 py-2">
+              <FolderKanban size={14} className="text-[#00F2FF]" />
+              <p
+                className="text-[#849495] text-[14px] tracking-[0.28px]"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontWeight: 500,
+                }}
+              >
+                NO_PROJECTS_YET
+              </p>
+            </div>
           </div>
         )}
       </section>

@@ -1,54 +1,18 @@
 import { Download } from "lucide-react";
 import { SectionHeader } from "../shared/SectionHeader";
 import { TerminalBadge } from "../shared/TerminalBadge";
+import type { About, Experience } from "@prisma/client";
+import type { CvFile } from "@/lib/types";
 
-const EXPERIENCE = [
-  {
-    role: "Senior Platform Engineer",
-    company: "CloudCorp Inc.",
-    period: "2022 – Present",
-    location: "Remote",
-    bullets: [
-      "Architected multi-region Kubernetes infrastructure serving 50M+ daily requests with 99.99% uptime",
-      "Reduced cloud spend by $550K annually through spot instance automation and right-sizing",
-      "Led migration of 300+ microservices from VMs to Kubernetes with zero downtime",
-      "Built internal developer platform reducing deployment times from 45 minutes to under 3 minutes",
-    ],
-  },
-  {
-    role: "DevOps Engineer",
-    company: "FinTech Startup",
-    period: "2020 – 2022",
-    location: "New York, NY",
-    bullets: [
-      "Designed and implemented CI/CD pipelines processing 500+ deployments per day",
-      "Implemented GitOps with ArgoCD across 12 Kubernetes clusters",
-      "Built observability stack with Prometheus, Grafana, and distributed tracing",
-      "Achieved SOC2 Type II compliance by implementing security controls and audit logging",
-    ],
-  },
-  {
-    role: "Infrastructure Engineer",
-    company: "Media Company",
-    period: "2018 – 2020",
-    location: "Los Angeles, CA",
-    bullets: [
-      "Migrated on-premise infrastructure to AWS, achieving 40% cost reduction",
-      "Containerized legacy monolith applications using Docker and Kubernetes",
-      "Implemented HashiCorp Vault for secrets management across 200+ services",
-      "Built infrastructure monitoring with 200+ custom Prometheus alerting rules",
-    ],
-  },
-];
+interface AboutPageProps {
+  aboutData?: About | null;
+  experiences?: Experience[];
+  cv?: CvFile | null;
+}
 
-const PERSONAL = [
-  { label: "Location", value: "Remote (US-East timezone)" },
-  { label: "Languages", value: "English (Native), Spanish (Conversational)" },
-  { label: "Education", value: "B.S. Computer Science, State University" },
-  { label: "Open To", value: "Remote, Contract, Full-time" },
-];
-
-export function AboutPage() {
+export function AboutPage({ aboutData, experiences = [], cv }: AboutPageProps) {
+  // Use provided experiences or empty array
+  const experienceList = experiences.length > 0 ? experiences : [];
   return (
     <div
       className="min-h-screen pt-24"
@@ -67,23 +31,36 @@ export function AboutPage() {
               className="text-[#b9cacb] text-[16px] leading-6.5"
               style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
             >
-              I architect, deploy, and maintain highly available infrastructure for mission-critical applications.
-              My approach focuses on infrastructure as code, zero-downtime deployments, and robust observability to
-              ensure systems run flawlessly under pressure.
+              {aboutData?.bio ||
+                `I architect, deploy, and maintain highly available infrastructure
+              for mission-critical applications. My approach focuses on
+              infrastructure as code, zero-downtime deployments, and robust
+              observability to ensure systems run flawlessly under pressure.`}
             </p>
             <p
               className="text-[#b9cacb] text-[16px] leading-6.5"
               style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
             >
-              With 10+ years in the trenches of cloud-native infrastructure, I&apos;ve led migrations from bare metal to
-              multi-cloud Kubernetes, built platform teams from scratch, and helped companies scale from startup to
-              enterprise without losing reliability.
+              With {aboutData?.yearsExp || "10+"} years in the trenches of
+              cloud-native infrastructure, I&apos;ve led migrations from bare
+              metal to multi-cloud Kubernetes, built platform teams from
+              scratch, and helped companies scale from startup to enterprise
+              without losing reliability.
             </p>
             <a
-              href="#"
+              href={
+                cv?.url
+                  ? `/api/cv/download?url=${encodeURIComponent(cv.url)}&filename=${encodeURIComponent(cv.filename ?? "resume.pdf")}`
+                  : "#"
+              }
               download
-              className="inline-flex items-center gap-2 border border-[rgba(225,253,255,0.4)] text-[#e1fdff] px-6 py-3 rounded-[2px] text-[12px] tracking-[1.2px] uppercase hover:border-[rgba(225,253,255,0.7)] transition-colors w-fit mt-2"
-              style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}
+              className={`inline-flex items-center gap-2 border border-[rgba(225,253,255,0.4)] text-[#e1fdff] px-6 py-3 rounded-[2px] text-[12px] tracking-[1.2px] uppercase hover:border-[rgba(225,253,255,0.7)] transition-colors w-fit mt-2 ${
+                cv ? "" : "opacity-50"
+              }`}
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 700,
+              }}
             >
               <Download size={12} /> DOWNLOAD_RESUME.PDF
             </a>
@@ -99,33 +76,62 @@ export function AboutPage() {
                 className="text-[#00F2FF] text-[24px]"
                 style={{ fontFamily: "'Geist', sans-serif", fontWeight: 800 }}
               >
-                K8
+                {(aboutData?.name || "K8")
+                  .split(" ")
+                  .map((word: string) => word[0])
+                  .join("")
+                  .toUpperCase()
+                  .slice(0, 2) || "K8"}
               </span>
             </div>
             <h3
               className="text-[#e1fdff] text-[20px] tracking-[-0.4px] mb-1"
               style={{ fontFamily: "'Geist', sans-serif", fontWeight: 700 }}
             >
-              DevOps Engineer
+              {aboutData?.name || "DevOps Engineer"}
             </h3>
             <p
               className="text-[#b3c5ff] text-[13px] tracking-[0.28px] mb-5"
-              style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 500 }}
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 500,
+              }}
             >
-              Platform Engineer · K8s Expert · Cloud Architect
+              {aboutData?.title ||
+                "Platform Engineer · K8s Expert · Cloud Architect"}
             </p>
             <div className="flex flex-col gap-3">
-              {PERSONAL.map((item) => (
+              {[
+                {
+                  label: "Location",
+                  value: aboutData?.location || "Remote (US-East timezone)",
+                },
+                {
+                  label: "Languages",
+                  value: "English (C1), French (C2), Arabic (Native)",
+                },
+                {
+                  label: "Education",
+                  value: "Software Engineering Masters at USTHB, Algiers",
+                },
+                { label: "Open To", value: "Remote, Contract, Full-time" },
+              ].map((item) => (
                 <div key={item.label} className="flex flex-col gap-0.5">
                   <span
                     className="text-[#849495] text-[11px] tracking-[1.2px] uppercase"
-                    style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 500 }}
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontWeight: 500,
+                    }}
                   >
                     {item.label}
                   </span>
                   <span
                     className="text-[#b9cacb] text-[13px]"
-                    style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 400,
+                    }}
                   >
                     {item.value}
                   </span>
@@ -143,10 +149,10 @@ export function AboutPage() {
         </div>
 
         <div className="flex flex-col gap-1">
-          {EXPERIENCE.map((exp, i) => (
+          {experienceList.map((exp, i) => (
             <div key={i} className="relative pl-8 pb-12">
               {/* Timeline line */}
-              {i < EXPERIENCE.length - 1 && (
+              {i < experienceList.length - 1 && (
                 <div className="absolute left-2.75 top-6 bottom-0 w-px bg-linear-to-b from-[rgba(0,242,255,0.4)] to-[rgba(0,242,255,0.05)]" />
               )}
               {/* Dot */}
@@ -162,13 +168,19 @@ export function AboutPage() {
                   <div>
                     <h3
                       className="text-[#e1fdff] text-[20px] tracking-[-0.4px]"
-                      style={{ fontFamily: "'Geist', sans-serif", fontWeight: 700 }}
+                      style={{
+                        fontFamily: "'Geist', sans-serif",
+                        fontWeight: 700,
+                      }}
                     >
                       {exp.role}
                     </h3>
                     <p
                       className="text-[#b3c5ff] text-[14px] tracking-[0.28px]"
-                      style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 500 }}
+                      style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontWeight: 500,
+                      }}
                     >
                       {exp.company} · {exp.location}
                     </p>
@@ -178,10 +190,15 @@ export function AboutPage() {
                 <ul className="flex flex-col gap-2">
                   {exp.bullets.map((bullet, j) => (
                     <li key={j} className="flex gap-2">
-                      <span className="text-[#00F2FF] mt-1 shrink-0 text-[12px]">›</span>
+                      <span className="text-[#00F2FF] mt-1 shrink-0 text-[12px]">
+                        ›
+                      </span>
                       <span
                         className="text-[#b9cacb] text-[14px] leading-5.5"
-                        style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
+                        style={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontWeight: 400,
+                        }}
                       >
                         {bullet}
                       </span>

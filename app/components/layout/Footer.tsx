@@ -1,17 +1,18 @@
+import { getAbout } from "@/lib/db";
 import {
   Github,
   // Linkedin, Twitter
 } from "lucide-react";
 
-const SOCIAL_LINKS = [
-  { label: "GITHUB", href: "https://github.com" },
-  { label: "LINKEDIN", href: "https://linkedin.com" },
-  { label: "X", href: "https://x.com" },
-  { label: "STATUS", href: "#" },
-  { label: "UPTIME", href: "#" },
-];
-
-export function Footer() {
+export async function Footer() {
+  const about = await getAbout();
+  const SOCIAL_LINKS = [
+    { label: "GITHUB", href: about?.github || "https://github.com" },
+    { label: "LINKEDIN", href: about?.linkedin || "https://linkedin.com" },
+    { label: "X", href: about?.twitter || "https://x.com" },
+    { label: "STATUS", href: "#" },
+    { label: "UPTIME", href: "#" },
+  ];
   return (
     <footer
       className="relative border-t border-[rgba(225,253,255,0.1)] py-6"
@@ -23,7 +24,9 @@ export function Footer() {
           style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}
         >
           <Github size={14} />
-          <span>© 2024 DEVOPS_ENGINEER // K8S_MASTER</span>
+          <span>
+            © {new Date().getFullYear()} DEVOPS_ENGINEER // K8S_MASTER
+          </span>
         </div>
 
         <nav className="flex items-center gap-6">

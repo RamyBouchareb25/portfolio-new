@@ -9,7 +9,11 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { CvFile } from "@/lib/types";
-import { uploadCVFileAction } from "@/lib/admin-actions";
+import {
+  uploadCVFileAction,
+  setActiveCVFileAction,
+  deleteCVFileAction,
+} from "@/lib/admin-actions";
 
 // const MOCK_FILES: CvFile[] = [
 //   {
@@ -86,11 +90,31 @@ export function AdminCV({ initialCVFiles }: AdminCVProps) {
   }
 
   function setActive(id: string) {
-    setFiles((fs) => fs.map((f) => ({ ...f, active: f.id === id })));
+    startTransition(async () => {
+      try {
+        const result = await setActiveCVFileAction(id);
+        if (!result.success) {
+          throw new Error(result.error ?? "Failed to set active CV");
+        }
+        setFiles((fs) => fs.map((f) => ({ ...f, active: f.id === id })));
+      } catch (error) {
+        console.error("Failed to set active CV:", error);
+      }
+    });
   }
 
   function deleteFile(id: string) {
-    setFiles((fs) => fs.filter((f) => f.id !== id));
+    startTransition(async () => {
+      try {
+        const result = await deleteCVFileAction(id);
+        if (!result.success) {
+          throw new Error(result.error ?? "Failed to delete CV");
+        }
+        setFiles((fs) => fs.filter((f) => f.id !== id));
+      } catch (error) {
+        console.error("Failed to delete CV:", error);
+      }
+    });
   }
 
   return (
