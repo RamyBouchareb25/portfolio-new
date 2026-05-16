@@ -1,14 +1,9 @@
-# robots.txt for the site
+# *
 User-agent: *
 Allow: /
 
-# Disallow admin and internal APIs
-Disallow: /admin/
-Disallow: /api/payload
-Disallow: /api/auth
+# Host
+Host: https://ramybouchareb.me
 
-# Sitemap (relative) — Next will expose /sitemap.xml
-Sitemap: /sitemap.xml
-
-# Crawl-delay can be added if necessary
-# Crawl-delay: 10
+# Sitemaps
+Sitemap: https://ramybouchareb.me/sitemap.xml
