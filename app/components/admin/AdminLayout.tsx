@@ -17,10 +17,12 @@ import {
   X,
   ChevronRight,
   FlaskConicalIcon,
+  Activity,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
+  { icon: Activity, label: "Analytics", href: "/admin/analytics" },
   { icon: User, label: "About Me", href: "/admin/about" },
   { icon: FolderOpen, label: "Projects", href: "/admin/projects" },
   { icon: Cpu, label: "Skills", href: "/admin/skills" },

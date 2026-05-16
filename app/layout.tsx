@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "./providers";
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: "Ramy - DevOps & Infrastructure Expert",
@@ -28,6 +29,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-D6529PKJWB"
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-D6529PKJWB');
+            `,
+          }}
+        />
+      </head>
       <body className="h-full antialiased">
         <AuthProvider>{children}</AuthProvider>
       </body>
