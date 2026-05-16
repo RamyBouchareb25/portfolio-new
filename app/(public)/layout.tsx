@@ -1,12 +1,15 @@
 import { Navbar } from "@/app/components/layout/Navbar";
 import { Footer } from "@/app/components/layout/Footer";
-import{ getPublicAbout } from "@/lib/public-queries";
+import { getPublicAbout } from "@/lib/public-queries";
+import { connection } from "next/server";
 
 export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await connection();
+
   const aboutData = await getPublicAbout();
 
   return (

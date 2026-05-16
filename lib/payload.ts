@@ -14,7 +14,10 @@ export async function fetchPayload(path: string, qs?: string) {
   const url = buildUrl(path, qs);
   const headers: Record<string, string> = { Accept: "application/json" };
   if (PAYLOAD_SECRET) headers["Authorization"] = `Bearer ${PAYLOAD_SECRET}`;
-  const res = await fetch(url, { headers });
+  const res = await fetch(url, {
+    headers,
+    cache: "no-store",
+  });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Payload request failed: ${res.status} ${text}`);
