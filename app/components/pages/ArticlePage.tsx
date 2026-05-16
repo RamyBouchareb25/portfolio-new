@@ -1,98 +1,443 @@
 import Link from "next/link";
-// import { useParams } from "next/navigation";
 import { ArrowLeft, Clock, Calendar, Share2 } from "lucide-react";
+import { notFound } from "next/navigation";
 import { TerminalBadge } from "../shared/TerminalBadge";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
-import imgArticleHero from "@/app/imports/ArticleNodeDeepDive/effe18e504183e602c5a355d8b6355f855f109c0.png";
+import { fetchPayload } from "@/lib/payload";
+import React from "react";
 
-const ARTICLE_CONTENT = [
-  {
-    type: "paragraph",
-    text: "Deploying Kubernetes in production is often synonymous with high infrastructure costs. While managed services like EKS, GKE, or AKS simplify operations, the compute costs can scale linearly. Leveraging AWS Spot Instances (or equivalent preemptible VMs) offers massive savings, but requires architectural resilience to handle sudden node termination.",
-  },
-  {
-    type: "heading2",
-    text: "1. The Architecture of Ephemeral Compute",
-  },
-  {
-    type: "paragraph",
-    text: "The core challenge is that a spot instance can be reclaimed with only a 2-minute warning. Our architecture must be designed assuming failure is not just possible, but imminent and frequent.",
-  },
-  {
-    type: "blockquote",
-    text: '"In a cloud-native world, infrastructure is ephemeral. Treat your servers like cattle, not pets. With spot instances, your cattle are on a very strict, unpredictable timer."',
-  },
-  {
-    type: "heading3",
-    text: "Node Groups Strategy",
-  },
-  {
-    type: "list",
-    items: [
-      {
-        title: "On-Demand Node Group:",
-        text: "Minimum 3 nodes spread across AZs for critical control plane components and stateful workloads.",
-      },
-      {
-        title: "Spot Node Group:",
-        text: "Autoscaling group for stateless microservices, workers, and batch jobs. Use multiple instance types.",
-      },
-      {
-        title: "Karpenter Integration:",
-        text: "Use Karpenter for intelligent, bin-packing node provisioning that automatically selects the cheapest available spot capacity.",
-      },
-    ],
-  },
-  {
-    type: "heading2",
-    text: "2. Making Workloads Spot-Tolerant",
-  },
-  {
-    type: "paragraph",
-    text: "For a workload to safely run on spot instances, it must handle interruption gracefully. This means proper PodDisruptionBudgets, multiple replicas, and graceful shutdown logic.",
-  },
-  {
-    type: "code",
-    language: "yaml",
-    text: `apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: api-server
-spec:
-  replicas: 3
-  template:
-    spec:
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - topologyKey: topology.kubernetes.io/zone
-      tolerations:
-      - key: "spot"
-        operator: "Exists"
-        effect: "NoSchedule"
-      terminationGracePeriodSeconds: 60`,
-  },
-  {
-    type: "heading2",
-    text: "3. Cost Analysis & Results",
-  },
-  {
-    type: "paragraph",
-    text: "After migrating 80% of our workloads to spot instances with this architecture, we achieved a 72% reduction in compute costs. Over 18 months, we observed zero spot-related incidents that caused user-facing downtime, with an average of 2-3 spot interruptions per week that were handled transparently.",
-  },
-];
+async function extractDocs(json: any) {
+  if (!json) return [];
+  if (Array.isArray(json)) return json;
+  if (json.docs) return json.docs;
+  if (json.results) return json.results;
+  if (json.rows) return json.rows;
+  if (json.posts) return json.posts;
+  return [];
+}
 
-export function ArticlePage() {
-  // const { slug } = useParams();
+function normalizeTags(
+  tags: any,
+  tagLookup: Map<string, string> = new Map(),
+): string[] {
+  if (!Array.isArray(tags)) return [];
+  return tags
+    .map((tag) => {
+      if (typeof tag === "number") {
+        return tagLookup.get(String(tag)) || "";
+      }
+      if (typeof tag === "string") return tag;
+      return (
+        tag?.name ||
+        tag?.title ||
+        tag?.label ||
+        tag?.slug ||
+        tag?.value?.name ||
+        tag?.value?.title ||
+        tag?.value?.label ||
+        tag?.value?.slug ||
+        tag?.fields?.name ||
+        tag?.fields?.title ||
+        ""
+      );
+    })
+    .filter(Boolean);
+}
+
+function toUrl(src: any) {
+  if (!src) return undefined;
+  const url =
+    typeof src === "string" ? src : src.url || src.path || src.filename;
+  if (!url) return undefined;
+  if (url.startsWith("http")) return url;
+  const base = (
+    process.env.PAYLOAD_SERVER_URL ||
+    process.env.NEXT_PUBLIC_PAYLOAD_URL ||
+    ""
+  ).replace(/\/$/, "");
+  return base ? `${base}${url}` : url;
+}
+
+function renderRichTextNodes(nodes: any[]): React.ReactNode {
+  return nodes.map((node, index) => {
+    if (!node) return null;
+
+    // Handle lists (unordered / ordered) and list-like structures
+    const isUnorderedList =
+      node.type === "list" ||
+      node.type === "unordered-list" ||
+      node.type === "bulleted-list" ||
+      node.type === "ul" ||
+      node.tag === "ul" ||
+      node.ordered === false;
+
+    const isOrderedList =
+      node.type === "ordered-list" ||
+      node.type === "ol" ||
+      node.ordered === true ||
+      node.tag === "ol";
+
+    if (isUnorderedList || isOrderedList) {
+      const items = Array.isArray(node.children) ? node.children : [];
+      const ListTag: any = isOrderedList ? "ol" : "ul";
+
+      return (
+        <ListTag
+          key={index}
+          className={
+            "text-[#e1fdff] text-[16px] leading-[26px] pl-6 " +
+            (isOrderedList ? "list-decimal" : "list-disc") +
+            " marker:text-[#e1fdff] space-y-2"
+          }
+          style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
+        >
+          {items.map((item: any, i: number) => {
+            // list item nodes can be various shapes; prefer their children
+            const liChildren = item.children || item.content || [];
+            return (
+              <li key={i} className="mb-1">
+                {renderRichTextNodes(liChildren)}
+              </li>
+            );
+          })}
+        </ListTag>
+      );
+    }
+
+    // Blockquote support (match OldArticlePage styling)
+    if (node.type === "blockquote" || node.tag === "blockquote") {
+      return (
+        <blockquote
+          key={index}
+          className="backdrop-blur-[6px] rounded-[2px] border border-[rgba(225,253,255,0.2)] border-l-4 border-l-[rgba(225,253,255,0.5)] px-5 py-4"
+          style={{ background: "rgba(10,10,10,0.8)" }}
+        >
+          <p
+            className="text-[#b9cacb] text-[16px] leading-[25.6px] italic"
+            style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
+          >
+            {renderRichTextNodes(node.children || [])}
+          </p>
+        </blockquote>
+      );
+    }
+
+    // Top-level code block / fenced code support
+    if (
+      node.type === "code" ||
+      node.type === "pre" ||
+      node.tag === "pre" ||
+      node.tag === "code"
+    ) {
+      const codeText =
+        node.text || node.code || node.value || node.fields?.code || "";
+      const language =
+        node.language ||
+        node.lang ||
+        node.fields?.language ||
+        node.fields?.languageName ||
+        "";
+
+      return (
+        <div
+          key={index}
+          className="rounded-lg border border-[rgba(0,242,255,0.2)] overflow-hidden"
+        >
+          <div
+            className="px-4 py-2 border-b border-[rgba(0,242,255,0.15)] flex items-center justify-between"
+            style={{ background: "rgba(0,10,10,0.8)" }}
+          >
+            <span
+              className="text-[#b3c5ff] text-[12px] tracking-[1.2px]"
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 500,
+              }}
+            >
+              {(language || "code").toUpperCase()}
+            </span>
+          </div>
+          <pre
+            className="p-5 overflow-x-auto text-[#e1fdff] text-[13px] leading-5.25"
+            style={{
+              background: "rgba(0,5,5,0.9)",
+              fontFamily: "'JetBrains Mono', monospace",
+              fontWeight: 400,
+            }}
+          >
+            <code>{String(codeText)}</code>
+          </pre>
+        </div>
+      );
+    }
+
+    // Inline code (Payload CMS may represent inline code in many shapes)
+    const isInlineCodeNode = (n: any) => {
+      if (!n) return false;
+      if (
+        n.type === "inlineCode" ||
+        n.type === "code_inline" ||
+        n.style === "code"
+      )
+        return true;
+      if (n.nodeType === "inlineCode" || n.markType === "code") return true;
+      if (n.data?.type === "code") return true;
+      if (n.attrs?.type === "code" || n.attributes?.type === "code")
+        return true;
+      const marks = n?.marks || n?.annotations || [];
+      if (
+        Array.isArray(marks) &&
+        marks.some((m: any) => m === "code" || m.type === "code")
+      )
+        return true;
+      // payload may include inline code as text nodes with a formatting mark
+      if (n.format === "code" || n.format === 2) return true;
+      return false;
+    };
+
+    if (
+      isInlineCodeNode(node) &&
+      (node.type === "text" ||
+        node.type === "inlineCode" ||
+        typeof node.text !== "undefined")
+    ) {
+      const text = node.text ?? node.value ?? node.code ?? "";
+      return (
+        <code
+          key={index}
+          className="bg-[rgba(0,10,10,0.6)] px-1 rounded text-[#e1fdff] font-mono text-[13px]"
+          style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 400 }}
+        >
+          {text}
+        </code>
+      );
+    }
+
+    if (node.type === "text") {
+      const text = node.text ?? "";
+      const content = node.format === 1 ? <strong>{text}</strong> : text;
+      return <React.Fragment key={index}>{content}</React.Fragment>;
+    }
+
+    if (node.type === "link") {
+      const href = node.fields?.url || node.fields?.link?.url || "#";
+      const children = renderRichTextNodes(node.children || []);
+      return (
+        <a
+          key={index}
+          href={href}
+          target={node.fields?.newTab ? "_blank" : undefined}
+          rel={node.fields?.newTab ? "noreferrer noopener" : undefined}
+          className="text-[#00F2FF] underline underline-offset-4"
+        >
+          {children}
+        </a>
+      );
+    }
+
+    if (node.type === "paragraph") {
+      return (
+        <p
+          key={index}
+          className="text-[#e5e2e1] text-[16px] leading-[25.6px]"
+          style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
+        >
+          {renderRichTextNodes(node.children || [])}
+        </p>
+      );
+    }
+
+    if (node.type === "heading") {
+      const text = renderRichTextNodes(node.children || []);
+
+      if (node.tag === "h4") {
+        return (
+          <h4
+            key={index}
+            className="text-[#b3c5ff] text-[20px]"
+            style={{ fontFamily: "'Geist', sans-serif", fontWeight: 400 }}
+          >
+            {text}
+          </h4>
+        );
+      }
+
+      if (node.tag === "h3") {
+        return (
+          <h3
+            key={index}
+            className="text-[#b3c5ff] text-[22px]"
+            style={{ fontFamily: "'Geist', sans-serif", fontWeight: 400 }}
+          >
+            {text}
+          </h3>
+        );
+      }
+
+      return (
+        <div key={index} className="relative pt-4">
+          <div className="absolute bottom-0 left-0 right-0 h-px opacity-20 bg-[rgba(225,253,255,0.2)]" />
+          <h2
+            className="text-[#e1fdff] text-[24px] pb-3 border-b border-[rgba(225,253,255,0.2)]"
+            style={{ fontFamily: "'Geist', sans-serif", fontWeight: 400 }}
+          >
+            {text}
+          </h2>
+        </div>
+      );
+    }
+
+    if (node.type === "block") {
+      const blockType = node.fields?.blockType;
+
+      if (blockType === "code") {
+        return (
+          <div
+            key={index}
+            className="rounded-lg border border-[rgba(0,242,255,0.2)] overflow-hidden"
+          >
+            <div
+              className="px-4 py-2 border-b border-[rgba(0,242,255,0.15)] flex items-center justify-between"
+              style={{ background: "rgba(0,10,10,0.8)" }}
+            >
+              <span
+                className="text-[#b3c5ff] text-[12px] tracking-[1.2px]"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontWeight: 500,
+                }}
+              >
+                {(node.fields?.language || "code").toUpperCase()}
+              </span>
+            </div>
+            <pre
+              className="p-5 overflow-x-auto text-[#e1fdff] text-[13px] leading-5.25"
+              style={{
+                background: "rgba(0,5,5,0.9)",
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 400,
+              }}
+            >
+              <code>{node.fields?.code || ""}</code>
+            </pre>
+          </div>
+        );
+      }
+
+      if (blockType === "mediaBlock") {
+        const mediaUrl = toUrl(node.fields?.media?.url || node.fields?.media);
+        return mediaUrl ? (
+          <div
+            key={index}
+            className="rounded-lg overflow-hidden border border-[rgba(0,242,255,0.15)] my-2"
+          >
+            <ImageWithFallback
+              src={mediaUrl}
+              alt={node.fields?.blockName || "Embedded media"}
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        ) : null;
+      }
+
+      if (blockType === "banner" && node.fields?.content?.root?.children) {
+        return (
+          <div
+            key={index}
+            className="backdrop-blur-[6px] rounded-[2px] border border-[rgba(225,253,255,0.2)] border-l-4 border-l-[rgba(225,253,255,0.5)] px-5 py-4"
+            style={{ background: "rgba(10,10,10,0.8)" }}
+          >
+            <div
+              className="text-[#b9cacb] text-[16px] leading-[25.6px]"
+              style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
+            >
+              {renderRichTextNodes(node.fields.content.root.children)}
+            </div>
+          </div>
+        );
+      }
+
+      return null;
+    }
+
+    if (Array.isArray(node.children) && node.children.length) {
+      return (
+        <React.Fragment key={index}>
+          {renderRichTextNodes(node.children)}
+        </React.Fragment>
+      );
+    }
+
+    return null;
+  });
+}
+
+export function ArticlePage({ slug }: { slug: string }) {
+  return <ArticleServer slug={slug} />;
+}
+
+async function ArticleServer({ slug }: { slug: string }) {
+  // Fetch post by slug from Payload
+  let post: any = null;
+  let tagLookup = new Map<string, string>();
+  try {
+    const json = await fetchPayload(
+      "/api/posts",
+      `where[slug][equals]=${encodeURIComponent(slug)}&limit=1&depth=2`,
+    );
+    const docs = await extractDocs(json);
+
+    try {
+      const tagsJson = await fetchPayload("/api/tags", "limit=100");
+      const allTags = await extractDocs(tagsJson);
+      tagLookup = new Map<string, string>(
+        allTags
+          .map((tag: any): [string, string] => [
+            String(tag.id),
+            tag.name || tag.title || tag.slug || "",
+          ])
+          .filter((entry: [string, string]) => Boolean(entry[1])),
+      );
+    } catch (tagErr) {
+      console.warn(
+        "Failed to fetch tags from Payload; continuing without tag lookup:",
+        tagErr,
+      );
+    }
+
+    post = docs && docs.length ? docs[0] : null;
+  } catch (err) {
+    console.error("Failed to load post:", err);
+  }
+
+  if (!post) {
+    notFound();
+  }
 
   const postMeta = {
-    title:
-      "Deep Dive: Running Kubernetes on Spot Instances Without Losing Your Mind",
-    date: "2024-01-15",
-    readTime: "12 min",
-    tags: ["Kubernetes", "AWS", "Cost Optimization"],
-    author: "DevOps Engineer",
+    title: post.title,
+    date: post.publishedAt || post.published_at || post.date || post.createdAt,
+    readTime: post.readingTime
+      ? `${post.readingTime} min`
+      : post.readTime || post.read_time || "",
+    tags: normalizeTags(post.tags, tagLookup),
+    description:
+      post.meta?.description ||
+      post.description ||
+      post.excerpt ||
+      post.lead ||
+      "",
+    author: post.author?.name || post.author || "",
   };
+
+  const hero = toUrl(
+    post.heroImage?.url ||
+      post.image?.url ||
+      post.featuredImage?.url ||
+      post.heroImage,
+  );
+
+  const contentBlocks = post.content?.root?.children || post.body || [];
 
   return (
     <div
@@ -116,7 +461,7 @@ export function ArticlePage() {
 
         {/* Tags */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {postMeta.tags.map((tag) => (
+          {(postMeta.tags || []).map((tag: string) => (
             <TerminalBadge key={tag}>{tag}</TerminalBadge>
           ))}
         </div>
@@ -128,6 +473,15 @@ export function ArticlePage() {
         >
           {postMeta.title}
         </h1>
+
+        {postMeta.description ? (
+          <p
+            className="text-[#b9cacb] text-[16px] leading-6.5 mb-6 max-w-3xl"
+            style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
+          >
+            {postMeta.description}
+          </p>
+        ) : null}
 
         {/* Meta */}
         <div className="flex items-center gap-6 pb-8 border-b border-[rgba(225,253,255,0.1)]">
@@ -160,130 +514,23 @@ export function ArticlePage() {
         </div>
 
         {/* Hero image */}
-        <div className="h-64 md:h-80 rounded-lg overflow-hidden border border-[rgba(0,242,255,0.15)] my-8">
-          <ImageWithFallback
-            src={imgArticleHero}
-            alt={postMeta.title}
-            className="w-full h-full object-cover opacity-70"
-          />
-        </div>
+        {hero && (
+          <div className="h-64 md:h-80 rounded-lg overflow-hidden border border-[rgba(0,242,255,0.15)] my-8">
+            <ImageWithFallback
+              src={hero}
+              alt={postMeta.title}
+              className="w-full h-full object-cover opacity-70"
+            />
+          </div>
+        )}
 
         {/* Article content */}
         <div className="flex flex-col gap-6">
-          {ARTICLE_CONTENT.map((block, i) => {
-            if (block.type === "paragraph") {
-              return (
-                <p
-                  key={i}
-                  className="text-[#e5e2e1] text-[16px] leading-[25.6px]"
-                  style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
-                >
-                  {block.text}
-                </p>
-              );
-            }
-            if (block.type === "heading2") {
-              return (
-                <div key={i} className="relative pt-4">
-                  <div className="absolute bottom-0 left-0 right-0 h-px opacity-20 bg-[rgba(225,253,255,0.2)]" />
-                  <h2
-                    className="text-[#e1fdff] text-[24px] pb-4 border-b border-[rgba(225,253,255,0.2)]"
-                    style={{
-                      fontFamily: "'Geist', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    {block.text}
-                  </h2>
-                </div>
-              );
-            }
-            if (block.type === "heading3") {
-              return (
-                <h3
-                  key={i}
-                  className="text-[#b3c5ff] text-[20px]"
-                  style={{ fontFamily: "'Geist', sans-serif", fontWeight: 400 }}
-                >
-                  {block.text}
-                </h3>
-              );
-            }
-            if (block.type === "blockquote") {
-              return (
-                <blockquote
-                  key={i}
-                  className="backdrop-blur-[6px] rounded-[2px] border border-[rgba(225,253,255,0.2)] border-l-4 border-l-[rgba(225,253,255,0.5)] px-5 py-4"
-                  style={{ background: "rgba(10,10,10,0.8)" }}
-                >
-                  <p
-                    className="text-[#b9cacb] text-[16px] leading-[25.6px] italic"
-                    style={{
-                      fontFamily: "'Inter', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    {block.text}
-                  </p>
-                </blockquote>
-              );
-            }
-            if (block.type === "code") {
-              return (
-                <div
-                  key={i}
-                  className="rounded-lg border border-[rgba(0,242,255,0.2)] overflow-hidden"
-                >
-                  <div
-                    className="px-4 py-2 border-b border-[rgba(0,242,255,0.15)] flex items-center justify-between"
-                    style={{ background: "rgba(0,10,10,0.8)" }}
-                  >
-                    <span
-                      className="text-[#b3c5ff] text-[12px] tracking-[1.2px]"
-                      style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {block.language?.toUpperCase()}
-                    </span>
-                  </div>
-                  <pre
-                    className="p-5 overflow-x-auto text-[#e1fdff] text-[13px] leading-5.25"
-                    style={{
-                      background: "rgba(0,5,5,0.9)",
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontWeight: 400,
-                    }}
-                  >
-                    <code>{block.text}</code>
-                  </pre>
-                </div>
-              );
-            }
-            if (block.type === "list" && block.items) {
-              return (
-                <ul key={i} className="flex flex-col gap-4">
-                  {block.items.map((item, j) => (
-                    <li key={j} className="flex gap-3">
-                      <span className="text-[#00F2FF] mt-1 shrink-0">›</span>
-                      <span
-                        className="text-[#e5e2e1] text-[16px] leading-[25.6px]"
-                        style={{
-                          fontFamily: "'Inter', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong className="text-[#e1fdff]">{item.title}</strong>{" "}
-                        {item.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              );
-            }
-            return null;
-          })}
+          {Array.isArray(contentBlocks) && contentBlocks.length ? (
+            renderRichTextNodes(contentBlocks)
+          ) : (
+            <div className="text-[#b9cacb]">No content available.</div>
+          )}
         </div>
 
         {/* Bottom navigation */}
